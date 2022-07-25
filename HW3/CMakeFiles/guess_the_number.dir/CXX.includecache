@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/alex/OTUS_CPP_basic/HW3_my/guess_the_number.cpp
+iostream
+-
+string
+-
+cstdlib
+-
+fstream
+-
+ctime
+-
+

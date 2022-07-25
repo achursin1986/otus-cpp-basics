@@ -1,0 +1,3 @@
+/home/alex/OTUS_CPP_basic/HW3_my/CMakeFiles/rebuild_cache.dir
+/home/alex/OTUS_CPP_basic/HW3_my/CMakeFiles/edit_cache.dir
+/home/alex/OTUS_CPP_basic/HW3_my/CMakeFiles/guess_the_number.dir
