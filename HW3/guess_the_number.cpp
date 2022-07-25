@@ -76,7 +76,11 @@ int main(int argc, char** argv)
 
        if ( ! skip ) { 
               std::cout << "Hi! Enter your name please:\n";
-              std::cin >> record->user;
+              std::cin.getline(record->user,20);
+              if (std::cin.fail()) {
+                          std::cout << "Bad value!" << std::endl;
+                          return -1;
+              }
 
               std::srand(std::time(nullptr));
               const int random_value = std::rand() % max_value;
