@@ -1,3 +1,0 @@
-Alex 3
-Bob 3
-Frank 9

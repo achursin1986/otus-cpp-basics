@@ -3,16 +3,26 @@
 #include <cstdlib>
 #include <fstream>
 #include <ctime>
+#include <cstring>
+
+
+struct userRec {
+         char user[20];
+         int score;
+};
 
 
 
 int main(int argc, char** argv) 
 {
        
-       int score{0}, guess{0},max_value{0},level{0};
+       int score{0}, guess{0},max_value{0},level{0},pos;
        bool skip{false}, found{false};
        std::string user{0};
-       const std::string scores_filename = "high_scores.txt";
+       const std::string scores_filename = "high_scores.bin";
+       userRec* record = new userRec;
+       userRec* test = new userRec;
+       std::fstream file;
        
        /*parse args */ 
 
@@ -66,7 +76,7 @@ int main(int argc, char** argv)
 
        if ( ! skip ) { 
               std::cout << "Hi! Enter your name please:\n";
-              std::cin >> user;
+              std::cin >> record->user;
 
               std::srand(std::time(nullptr));
               const int random_value = std::rand() % max_value;
@@ -82,59 +92,73 @@ int main(int argc, char** argv)
        
                     if ( guess > random_value ) {
                                  std::cout << "less than " << guess << std::endl;
-                                 ++score;
+                                 ++record->score;
                                  continue;
                     }
                     if ( guess < random_value ) {
                                  std::cout << "greater than " << guess << std::endl;
-                                 ++score;
+                                 ++record->score;
                                  continue;
                     }
                     if ( guess == random_value ) {
-                                 ++score;
+                                 ++record->score;
                                  
-                                 std::cout << "you won! attempts = " << score << std::endl;
+                                 std::cout << "you won! attempts = " << record->score << std::endl;
                                  break; 
                     }
        
                } while ( true );
 
-
               /*  saving results for an user  */
-              std::ofstream out_file{scores_filename, std::ios_base::app};
-              if (!out_file.is_open()) {
-                        std::cout << "Failed to open file for write: " << scores_filename << "!" << std::endl;
-                        return -1;
-              }
+              file.open(scores_filename, std::ios::in | std::ios::binary | std::ios::out );
+              //if (!file.is_open())  {
+              //              std::cout << "Failed to open file for read and write: " << scores_filename << "!" << std::endl;
+              //              return -1;
+              //}
+              while (file.read(reinterpret_cast<char*>(test), sizeof(*test)) ) {
+                           pos = file.tellg();
+                           if ( file )  { 
+                                if ( strcmp(test->user,record->user) == 0 ) {
+                                            found = true;
+                                            if ( record->score < test->score ) {  
+                                                          file.seekp(pos-sizeof(*record), std::ios::beg);
+                                                          file.write(reinterpret_cast<char*>(record), sizeof(*record));
+                                                           break;
+                                            }
+                                } 
 
-              out_file << user << ' ';
-              out_file << score;
-              out_file << std::endl;      
-             
-                    
+                           } 
+
+
+              } 
+              file.close();
+              if ( ! found )  {
+                    file.open(scores_filename,  std::ios::binary | std::ios::app);
+                    if (!file.is_open())  {
+                            std::cout << "Failed to open file for append: " << scores_filename << "!" << std::endl;
+                            return -1;
+                    }
+                    file.write(reinterpret_cast<char*>(record), sizeof(*record));
+                    file.close(); 
+              }
        } 
 
 
        /* high scores table print */
-       std::ifstream in_file{scores_filename};
-       if (!in_file.is_open()) {
-                   std::cout << "Failed to open file for read: " << scores_filename << "!" << std::endl;
-                   return -1;
-        }
-
-       std::cout << "High scores table:" << std::endl;
-
-       while (true) {
-            in_file >> user;
-            in_file >> score;
-            in_file.ignore();
-                 if (in_file.fail()) {
-                                break;
-                 }
-
-                 std::cout << user << '\t' << score << std::endl;
-       }
        
+          file.open(scores_filename, std::fstream::in | std::fstream::binary);
+           if (!file.is_open())  {
+                            std::cout << "Failed to open file for read: " << scores_filename << "!" << std::endl;
+                            return -1;
+             }
+           std::cout << "High scores table:" << std::endl;
+           while ( file.read(reinterpret_cast<char*>(test), sizeof(*test)) ) {
+                  std::cout << test->user << " " << test->score << std::endl;
+                  }
+                   
+           file.close();
+           free(record);
+           free(test);
                   
 
 return 0;
