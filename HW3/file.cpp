@@ -7,7 +7,7 @@
 
 
 int dump_table (const std::string scores_filename) {
-           UserRec test;
+           UserRec test{{},0};
            std::fstream file;
            file.open(scores_filename, std::fstream::in | std::fstream::binary);
            if (!file.is_open())  {
