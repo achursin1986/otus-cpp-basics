@@ -1,1 +1,0 @@
-/usr/bin/c++     CMakeFiles/guess_the_number.dir/guess_the_number.cpp.o  -o build/guess_the_number 
