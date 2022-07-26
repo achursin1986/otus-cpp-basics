@@ -7,6 +7,10 @@ set(CMAKE_CXX_FLAGS_RELEASE_INIT "-Wall -Werr -Wextra -pedantic")
 
 add_executable(guess_the_number 
     guess_the_number.cpp
+    file.cpp
+    game.cpp
+    func.h
+    struct.h
 )
 
 set_target_properties(guess_the_number PROPERTIES

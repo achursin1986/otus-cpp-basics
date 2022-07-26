@@ -1,0 +1,84 @@
+alex@alex-ubuntu:~/OTUS_CPP_basic/HW3/build$ ./guess_the_number -level 1
+Hi! Enter your name please:
+Carl
+Enter your guess:2
+greater than 2
+Enter your guess:5
+greater than 5
+Enter your guess:8
+less than 8
+Enter your guess:9
+less than 9
+Enter your guess:9
+less than 9
+Enter your guess:3
+greater than 3
+Enter your guess:4
+greater than 4
+Enter your guess:5
+greater than 5
+Enter your guess:6
+greater than 6
+Enter your guess:7
+you won! attempts = 10
+High scores table:
+Alex 1
+Bob 4
+Carl 10
+alex@alex-ubuntu:~/OTUS_CPP_basic/HW3/build$ ./guess_the_number -level 1
+Hi! Enter your name please:
+Carl
+Enter your guess:5
+greater than 5
+Enter your guess:7
+less than 7
+Enter your guess:6
+you won! attempts = 3
+High scores table:
+Alex 1
+Bob 4
+Carl 3
+alex@alex-ubuntu:~/OTUS_CPP_basic/HW3/build$ ./guess_the_number -table
+High scores table:
+Alex 1
+Bob 4
+Carl 3
+alex@alex-ubuntu:~/OTUS_CPP_basic/HW3/build$
+alex@alex-ubuntu:~/OTUS_CPP_basic/HW3/build$
+alex@alex-ubuntu:~/OTUS_CPP_basic/HW3/build$
+alex@alex-ubuntu:~/OTUS_CPP_basic/HW3/build$
+alex@alex-ubuntu:~/OTUS_CPP_basic/HW3/build$ ./guess_the_number -max 5
+Hi! Enter your name please:
+John
+Enter your guess:4
+less than 4
+Enter your guess:2
+less than 2
+Enter your guess:1
+less than 1
+Enter your guess:0
+you won! attempts = 4
+High scores table:
+Alex 1
+Bob 4
+Carl 3
+John 4
+
+
+alex@alex-ubuntu:~/OTUS_CPP_basic/HW3/build$ xxd -b high_scores.bin
+00000000: 01000001 01101100 01100101 01111000 00000000 00000000  Alex..
+00000006: 00000000 00000000 00000000 00000000 00000000 00000000  ......
+0000000c: 00000000 00000000 00000000 00000000 00000000 00000000  ......
+00000012: 00000000 00000000 00000001 00000000 00000000 00000000  ......
+00000018: 01000010 01101111 01100010 00000000 00000000 00000000  Bob...
+0000001e: 00000000 00000000 00000000 00000000 00000000 00000000  ......
+00000024: 00000000 00000000 00000000 00000000 00000000 00000000  ......
+0000002a: 00000000 00000000 00000100 00000000 00000000 00000000  ......
+00000030: 01000011 01100001 01110010 01101100 00000000 00000000  Carl..
+00000036: 00000000 00000000 00000000 00000000 00000000 00000000  ......
+0000003c: 00000000 00000000 00000000 00000000 00000000 00000000  ......
+00000042: 00000000 00000000 00000011 00000000 00000000 00000000  ......
+00000048: 01001010 01101111 01101000 01101110 00000000 00000000  John..
+0000004e: 00000000 00000000 00000000 00000000 00000000 00000000  ......
+00000054: 00000000 00000000 00000000 00000000 00000000 00000000  ......
+0000005a: 00000000 00000000 00000100 00000000 00000000 00000000  ......
