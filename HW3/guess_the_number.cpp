@@ -6,12 +6,20 @@
 #include <cstring>
 
 
-struct userRec {
+class UserRec {
+public:
+         UserRec();
          char user[20];
          int score;
-};
 
+} ;
 
+UserRec::UserRec() 
+{ 
+         strcpy(user,"empty");
+         score = 0; 
+
+}
 
 int main(int argc, char** argv) 
 {
@@ -20,8 +28,7 @@ int main(int argc, char** argv)
        bool skip{false}, found{false};
        std::string user{0};
        const std::string scores_filename = "high_scores.bin";
-       userRec* record = new userRec;
-       userRec* test = new userRec;
+       UserRec* record,test;
        std::fstream file;
        
        /*parse args */ 
@@ -115,10 +122,10 @@ int main(int argc, char** argv)
 
               /*  saving results for an user  */
               file.open(scores_filename, std::ios::in | std::ios::binary | std::ios::out );
-              //if (!file.is_open())  {
-              //              std::cout << "Failed to open file for read and write: " << scores_filename << "!" << std::endl;
-              //              return -1;
-              //}
+              if (!file.is_open())  {
+                            std::cout << "Failed to open file for read and write: " << scores_filename << "!" << std::endl;
+                            return -1;
+              }
               while (file.read(reinterpret_cast<char*>(test), sizeof(*test)) ) {
                            pos = file.tellg();
                            if ( file )  { 
@@ -161,8 +168,6 @@ int main(int argc, char** argv)
                   }
                    
            file.close();
-           free(record);
-           free(test);
                   
 
 return 0;
