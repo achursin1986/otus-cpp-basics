@@ -2,6 +2,7 @@
 // Lexer implementation
 
 #include "lexer.hpp"
+#include<iostream>
 
 #include <cctype>
 
@@ -35,6 +36,7 @@ Lexer::Token Lexer::next_token() {
             }
             state_ = State::Empty;
             return Token::Name;
+
         case State::Empty:
             if (end()) {
                 state_ = State::End;
@@ -47,7 +49,8 @@ Lexer::Token Lexer::next_token() {
             if (isoperator(ch_)) {
                 operator_ = ch_;
                 next_char();
-                return Token::Operator;
+                return Token::Operator; 
+                
             }
             if (ch_ == '(') {
                 next_char();

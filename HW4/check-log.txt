@@ -1,0 +1,68 @@
+alex@alex-ubuntu:~/OTUS_CPP_basic/HW4$ ./calc
+3
+3
+alex@alex-ubuntu:~/OTUS_CPP_basic/HW4$ ./calc
+5 + 12
+    5
++
+    12
+alex@alex-ubuntu:~/OTUS_CPP_basic/HW4$ ./calc
+3 + 12*4
+    3
++
+        12
+    *
+        4
+alex@alex-ubuntu:~/OTUS_CPP_basic/HW4$ ./calc
+2*3 - 6/2
+        2
+    *
+        3
+-
+        6
+    /
+        2
+alex@alex-ubuntu:~/OTUS_CPP_basic/HW4$ ./calc
+a*a + 2*a*b + b*b
+            a
+        *
+            a
+    +
+                2
+            *
+                a
+        *
+            b
++
+        b
+    *
+        b
+alex@alex-ubuntu:~/OTUS_CPP_basic/HW4$ ./calc
+3* (2+4)
+    3
+*
+        2
+    +
+        4
+alex@alex-ubuntu:~/OTUS_CPP_basic/HW4$ ./calc
+123abc
+Error: expected an operation
+alex@alex-ubuntu:~/OTUS_CPP_basic/HW4$ ./calc
+*3
+    Error: expected a var or number
+*
+    3
+alex@alex-ubuntu:~/OTUS_CPP_basic/HW4$ ./calc
+12(+2)
+Error: expected an operation
+alex@alex-ubuntu:~/OTUS_CPP_basic/HW4$ ./calc
+a b
+Error: expected an operation
+alex@alex-ubuntu:~/OTUS_CPP_basic/HW4$ ./calc
+12 43
+Error: expected an operation
+alex@alex-ubuntu:~/OTUS_CPP_basic/HW4$ ./calc
+3 +
+    3
++
+    Error: expected a var or number

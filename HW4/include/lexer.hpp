@@ -19,9 +19,9 @@ class Lexer {
 
     explicit Lexer(std::istream &in);
 
-    Lexer(const Lexer &other) = delete;
+    Lexer(const Lexer &other) = default;
 
-    Lexer &operator=(const Lexer &other) = delete;
+    Lexer &operator=(const Lexer &other) = default;
 
     Token next_token();
 
@@ -52,6 +52,7 @@ class Lexer {
     std::string operator_;
     char ch_;
     std::istream &in_;
+
 };
 
 inline Lexer::Lexer(std::istream &in)

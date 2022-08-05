@@ -2,6 +2,7 @@
 #include "number.hpp"
 #include "mathops.hpp"
 #include "variable.hpp"
+#include "errors.hpp"
 
 using Token = Lexer::Token;
 
@@ -32,6 +33,7 @@ ASTNode *Parser::expr() {
         }
         default:
             return root;
+            
         }
     }
 }
@@ -57,10 +59,12 @@ ASTNode *Parser::term() {
             }
             break;
         }
+        break;
+
         default:
             return root;
         }
-    }
+   }
 }
 
 ASTNode *Parser::prim() {
@@ -69,15 +73,32 @@ ASTNode *Parser::prim() {
     next_token();
     switch (tok_) {
     case Token::Number:
-        node = new Number(lexer_.get_number());
-        break;
+            node = new Number(lexer_.get_number());
+            break;
     case Token::Name:
         // Implement Variable class and uncomment this line
-        node = new Variable(lexer_.get_name());
-        break;
+            node = new Variable(lexer_.get_name());
+            break;
+    case Token::Lbrace:
+        node = expr();
+        if ( tok_ != Token::Rbrace ) {
+              node = new Error("Error: expected )");
+              return node;
+        } 
+        next_token();  
+        return node;
+        
+        break; 
     default:
-        break;
+        node = new Error("Error: expected a var or number");
+        return node; 
     }
+
     next_token();
+    if ( tok_ == Token::Name || tok_ == Token::Number || tok_ == Token::Lbrace ) {
+              node = new Error("Error: expected an operation");
+
+    }
+
     return node;
 }
