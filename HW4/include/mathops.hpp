@@ -37,6 +37,6 @@ class Mul : public ASTNode {
 class Div : public ASTNode {
   public:
     Div(ASTNode* left, ASTNode* right)
-        : ASTNode(":", left, right) {}
+        : ASTNode("/", left, right) {}
 };
 
