@@ -1,3 +1,0 @@
-/home/alex/OTUS_CPP_basic/HW5/CMakeFiles/rebuild_cache.dir
-/home/alex/OTUS_CPP_basic/HW5/CMakeFiles/edit_cache.dir
-/home/alex/OTUS_CPP_basic/HW5/CMakeFiles/statistics.dir
