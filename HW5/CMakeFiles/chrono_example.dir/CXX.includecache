@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/alex/OTUS_CPP_basic/HW5/chrono_example.cpp
+chrono
+-
+iostream
+-
+vector
+-
+algorithm
+-
+random
+-
+
