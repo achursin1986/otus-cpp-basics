@@ -1,6 +1,10 @@
 #pragma once
 
 
+#include <iterator>
+#include <cstddef>
+
+
 /* Linked L2 - two way linked container implementation, element index starts with 1 */
 
 
@@ -10,17 +14,49 @@ template <typename T> struct Data {
                      struct Data<T>* prev;
                  };
 
-template <typename T> struct Iter {
-                     T value;
-                     struct Data<T>* next;
-                     struct Data<T>* prev;
-                 };
 
 
 
 template <typename T> class L2_Node { 
               
          public:
+                struct Iterator { 
+                      Iterator() :
+                          CurrentNode (Head) { }
+ 
+                      Iterator(const Data<T>* Node):
+                           CurrentNode (Node) { }
+ 
+                      Iterator& operator=(Data<T>* Node){
+                           this->CurrentNode = Node;
+                           return *this;
+                      }
+                      Iterator& operator++(){
+                           if (CurrentNode){
+                                  CurrentNode = CurrentNode->next;
+                           }
+                           return *this;
+                      }
+                      Iterator operator++(int){
+                           Iterator iterator = *this;
+                           ++*this;
+                           return iterator;
+                      }
+                      bool operator!=(const Iterator& iterator){
+                            return CurrentNode != iterator.CurrentNode;
+
+                      }
+ 
+                      int operator*(){
+                             return CurrentNode->value;
+                      }
+ 
+
+                 private: 
+                         const Data<T>* CurrentNode;
+                }; 
+
+               
                 L2_Node(int value) {
                      Head = new struct Data<T>;
                      Head->value = value;
@@ -84,11 +120,24 @@ template <typename T> class L2_Node {
                   return Temp->value;
                    
                 }
+                L2_Node(L2_Node&& Other)  {
+                                 std::swap(Head, Other.Head);
+                                 std::swap(Tail, Other.Tail);
+                }                
+                L2_Node& operator=  (L2_Node&& Other)  {
+                                 std::swap(Head, Other.Head);
+                                 std::swap(Tail, Other.Tail);
+                                 return *this;
+                } 
+
+                Iterator begin() { return Iterator(Head); }
+                Iterator end()   { return Iterator(NULL); }
 
 
 
          private:
                 struct Data<T>* Head{};
+                struct Data<T>* Tail{};
 
                 
                 
@@ -107,6 +156,7 @@ template <typename T> void L2_Node<T>::Push_back(T value) {
                       Temp = Temp->next;
                  }
               New = new Data<T>;
+              Tail = New; // for iterator
               New->value = value;
               New->next = NULL;
               New->prev = Before; 

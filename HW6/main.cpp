@@ -10,6 +10,7 @@ int main(){
     S_Node<int> cont(10);
     L2_Node<int> cont2(0); // inited first element as 0
     L1_Node<int> cont3(0);
+    L2_Node<int> cont4(0); // for move and assign
 
     std::cout << "==============================" << std::endl;    
     std::cout << "->Serial container type:" << std::endl;
@@ -111,6 +112,27 @@ int main(){
     std::cout << "4th element: " <<std::endl;
     std::cout << cont3[4];
     std::cout << std::endl;
+
+
+    std::cout << "==============================" << std::endl;
+    std::cout << "->Linked 2 way iterator:" << std::endl;
+    std::cout << "==============================" << std::endl;
+
+
+    for (auto i = cont2.begin(), end = cont2.end(); i != end; ++i) { 
+               std::cout << *i << " ";
+    }
+     std::cout << std::endl;
+
+
+    std::cout << "===========================================" << std::endl;
+    std::cout << "->Linked 2 way std::move with rvalue:" << std::endl;
+    std::cout << "===========================================" << std::endl;
+    cont4= std::move(cont2); //eating cont2 for cont4's profit
+    cont4.Print();
+    
+
+
      
     return 0; 
 
