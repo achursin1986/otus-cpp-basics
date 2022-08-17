@@ -1,0 +1,51 @@
+[==========] Running 20 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 11 tests from L2_linked
+[ RUN      ] L2_linked.creation_with_int0
+[       OK ] L2_linked.creation_with_int0 (0 ms)
+[ RUN      ] L2_linked.creation_with_double5
+[       OK ] L2_linked.creation_with_double5 (0 ms)
+[ RUN      ] L2_linked.10_int_elements
+[       OK ] L2_linked.10_int_elements (0 ms)
+[ RUN      ] L2_linked.int_size
+[       OK ] L2_linked.int_size (0 ms)
+[ RUN      ] L2_linked.append_int_begin
+[       OK ] L2_linked.append_int_begin (0 ms)
+[ RUN      ] L2_linked.erase_int_357elem
+[       OK ] L2_linked.erase_int_357elem (0 ms)
+[ RUN      ] L2_linked.insert_int_middle
+[       OK ] L2_linked.insert_int_middle (0 ms)
+[ RUN      ] L2_linked.append_int_end
+[       OK ] L2_linked.append_int_end (0 ms)
+[ RUN      ] L2_linked.container_int_copy
+[       OK ] L2_linked.container_int_copy (1 ms)
+[ RUN      ] L2_linked.container_int_delete
+[       OK ] L2_linked.container_int_delete (0 ms)
+[ RUN      ] L2_linked.container_int_move
+[       OK ] L2_linked.container_int_move (0 ms)
+[----------] 11 tests from L2_linked (1 ms total)
+
+[----------] 9 tests from vector
+[ RUN      ] vector.creation_with_int0
+[       OK ] vector.creation_with_int0 (0 ms)
+[ RUN      ] vector.creation_with_double5
+[       OK ] vector.creation_with_double5 (0 ms)
+[ RUN      ] vector.10_int_elements
+[       OK ] vector.10_int_elements (0 ms)
+[ RUN      ] vector.int_size
+[       OK ] vector.int_size (0 ms)
+[ RUN      ] vector.append_int_begin
+[       OK ] vector.append_int_begin (0 ms)
+[ RUN      ] vector.erase_int_357elem
+[       OK ] vector.erase_int_357elem (0 ms)
+[ RUN      ] vector.insert_int_middle
+[       OK ] vector.insert_int_middle (0 ms)
+[ RUN      ] vector.append_int_end
+[       OK ] vector.append_int_end (0 ms)
+[ RUN      ] vector.container_int_copy
+[       OK ] vector.container_int_copy (0 ms)
+[----------] 9 tests from vector (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 20 tests from 2 test suites ran. (1 ms total)
+[  PASSED  ] 20 tests.
