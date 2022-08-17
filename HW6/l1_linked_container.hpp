@@ -17,6 +17,7 @@ template <typename T> class L1_Node {
                      Head = new struct Data1<T>;
                      Head->value = value;
                      Head->next = NULL;
+                     Tail = Head;
                 }
                 ~L1_Node() {      
                      struct Data1<T>*Temp,*Before{};
@@ -72,6 +73,7 @@ template <typename T> class L1_Node {
 
          private:
                 struct Data1<T>* Head{};
+                struct Data1<T>* Tail{};
 
                 
                 
@@ -82,18 +84,20 @@ template <typename T> class L1_Node {
 
 
 template <typename T> void L1_Node<T>::Push_back(T value) {
-              struct Data1<T>* Temp,*Before,*New;
-              Temp = Head;
+              struct Data1<T>/** Temp,*Before,*/*New;
+              /*Temp = Head;
               if ( Temp ) {
                  while ( Temp ) {
                       Before = Temp; 
                       Temp = Temp->next;
                  }
+              */
               New = new Data1<T>;
               New->value = value;
               New->next = NULL; 
-              Before->next = New;
-              }
+              Tail->next = New;
+              Tail = New;
+              //}
 
                    
 }

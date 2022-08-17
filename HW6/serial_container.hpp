@@ -12,15 +12,11 @@ template <typename T> class S_Node {
                      array = new T[size];
                 }
                 ~S_Node() {
-                     delete array;
+                     delete []array;
                 }
-                void Insert(int pos, T value);
+                void Insert(int pos, const T &value);
 
                 void Print();
-                
-                // service funcs
-                T* Expand05(T* array);
-                void Shift(T* array, int pos);
 
                 void Erase(int pos);
                 
@@ -38,29 +34,42 @@ template <typename T> class S_Node {
                      if ( index <= 0 || index > capacity - free ) {
 
                          std::cout<< "Out of boundary access attempt, 1st element" << std::endl;
-                         return array[0]; 
+                         std::exit(1); 
                          
                      }
                      return array[index-1];
                 }
+                T& operator[](int index) const { 
+                     if ( index <= 0 || index > capacity - free ) {
+
+                         std::cout<< "Out of boundary access attempt, 1st element" << std::endl;
+                         std::exit(1);
+
+                     }
+                     return array[index-1];
+
+                }
 
 
          private:
-                int capacity{};
-                int free{};
+                 //service funcs
+                 T* Expand05(T* array);
+                 void Shift(T* array, int pos);
+                
+                int capacity = 0 ;
+                int free = 0;
                 T* array;
 
 };
 
 
 template <typename T> T* S_Node<T>::Expand05(T* array) {
-                 T* temp = new T[int(capacity + capacity *0.5)];                 
+                 T* temp = new T[capacity + capacity/2];                 
                  for (int i=0;i<capacity;i++) {
                                  temp[i] = array [i];
                  }
-                 free = capacity *0.5;
-                 capacity = capacity + capacity *0.5;
-                 delete array;
+                 free = capacity/2;
+                 capacity = capacity + capacity/2;
                  return temp; 
 }
 
@@ -76,7 +85,7 @@ template <typename T> void S_Node<T>::Shift(T* array, int pos) {
                  for (int i=pos-1;i<capacity;i++) {
                              array[i+1] = temp [i-pos+1]; // recovering elements
                       }
-                 delete temp;
+                 delete []temp;
                  
 }
 
@@ -102,7 +111,7 @@ template <typename T> void S_Node<T>::Push_back(T value) {
 
 
 
-template <typename T> void S_Node<T>::Insert(int pos, T value) {
+template <typename T> void S_Node<T>::Insert(int pos, const T &value) {
                    if ( pos <= 0 || pos > capacity-free )  {
                       std::cout<< "Out of boundary access attempt" << std::endl;
                       return;
@@ -143,7 +152,7 @@ template <typename T> void S_Node<T>::Print() {
               if ( i == capacity -1 ) { 
                          std::cout<< array[i];
                          break;
-               }  
+               } 
          std::cout<< array[i] << " "; 
          }
          std::cout<< std::endl;

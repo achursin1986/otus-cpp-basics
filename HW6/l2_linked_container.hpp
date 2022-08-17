@@ -22,7 +22,7 @@ template <typename T> class L2_Node {
          public:
                 struct Iterator { 
                       Iterator() :
-                          CurrentNode (Head) { }
+                          CurrentNode () { }
  
                       Iterator(const Data<T>* Node):
                            CurrentNode (Node) { }
