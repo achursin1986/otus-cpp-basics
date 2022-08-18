@@ -4,13 +4,24 @@
 
 using namespace std;
 
-template <typename T> class Mock : public vector<T> {
+/*
+template <typename T> class Mocker : private vector<int> {
 public:
-    Mock(): vector<T>() {}
+    Mocker(): vector<T>() {}
     MOCK_METHOD(void, Die, ());
-    ~Mock() { Die(); }
+     ~Mocker() { Die(); }
 
 };
+*/
+
+class Mocker : public vector<int> {
+
+public:
+    Mocker(): vector<int>() {}
+    MOCK_METHOD(void, Die, ());
+     ~Mocker() { Die(); }
+
+}; 
 
 
 
@@ -136,15 +147,15 @@ TEST(vector,container_int_copy) {
 }
 
 
-/*      Causing seg fault
 
 TEST(vector,container_int_delete) {
-            Mock<int> vec{}; 
+            //using ::testing::Mock;
+            Mocker vec;
             for ( int i=0; i<10; i++ ) {
                      vec.push_back(i);
              }
-             vec.clear();
              EXPECT_CALL(vec, Die());
+             //Mock::VerifyAndClearExpectations(&vec);
 }
 
 
@@ -152,7 +163,7 @@ TEST(vector,container_int_delete) {
 TEST(vector,container_int_move) {
 
             vector<int> vec1;
-            Mock<int> vec;
+            Mocker vec;
             for ( int i=0; i<10; i++ ) {
                      vec.push_back(i);
             }
@@ -162,5 +173,5 @@ TEST(vector,container_int_move) {
                         
 
 }
-*/
+
 
