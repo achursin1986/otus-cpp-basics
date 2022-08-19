@@ -70,6 +70,7 @@ template <typename T> T* S_Node<T>::Expand05(T* array) {
                  }
                  free = capacity/2;
                  capacity = capacity + capacity/2;
+                 delete[] array;
                  return temp; 
 }
 
@@ -78,14 +79,17 @@ template <typename T> void S_Node<T>::Shift(T* array, int pos) {
                       std::cout<< "Out of boundary access attempt" << std::endl;
                       return; 
                  } 
-                 T* temp = new T[capacity - pos + 1];
+                 /*T* temp = new T[capacity - pos + 2];
                  for (int i=pos-1;i<capacity;i++) {
                              temp[i-pos+1] = array [i]; // saving elements to move
                       }
                  for (int i=pos-1;i<capacity;i++) {
                              array[i+1] = temp [i-pos+1]; // recovering elements
                       }
-                 delete []temp;
+                 delete []temp;*/
+                 for (int i=capacity-1;i>=pos;i--) {
+                         array[i] = array[i-1];
+                 }
                  
 }
 
@@ -139,7 +143,7 @@ template <typename T> void S_Node<T>::Erase(int pos) {
                                 std::cout<< "Out of boundary access attempt" << std::endl;
                                 return;
                      } 
-                     for (int i=pos-1;i<capacity;i++) {
+                     for (int i=pos-1;i<capacity-1;i++) {
                          array[i] = array[i+1];         
                      }
                      free++;

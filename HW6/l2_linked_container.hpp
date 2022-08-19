@@ -3,6 +3,7 @@
 
 #include <iterator>
 #include <cstddef>
+#include <iostream>
 
 
 /* Linked L2 - two way linked container implementation, element index starts with 1 */
@@ -59,27 +60,21 @@ template <typename T> class L2_Node {
                
                 L2_Node(int value) {
                      Head = new struct Data<T>;
+                     std::cout << "Allocate new node" << std::endl;
                      Head->value = value;
                      Head->prev = NULL;
                      Head->next = NULL;
                 }
                 ~L2_Node() {
-                     struct Data<T>* Temp,*Before;
-                     Temp = Head; 
+                     struct Data<T>* Temp;
+                     if ( Tail && Head ) {
+                     Temp = Tail->prev;                   
                      while ( Temp ) {
-                        Before = Temp; 
-                        Temp = Temp -> next;
+                            delete Temp->next;
+                            Temp = Temp->prev;
                      }
-                     Temp = Before;
-                     // need to walk the whole thing back
-                     while ( Temp ) {
-                        if ( Temp->next ) {
-                            delete Temp->next;         
-                        }
-                        Temp = Temp->prev;
                      }
-                     delete Head;  
-                     
+                     delete Head;
                 }
                 void Insert(int pos, T value);
 
@@ -121,12 +116,34 @@ template <typename T> class L2_Node {
                    
                 }
                 L2_Node(L2_Node&& Other)  {
+                                 std::cout << "move is called" << std::endl;
                                  std::swap(Head, Other.Head);
                                  std::swap(Tail, Other.Tail);
-                }                
-                L2_Node& operator=  (L2_Node&& Other)  {
-                                 std::swap(Head, Other.Head);
-                                 std::swap(Tail, Other.Tail);
+                                 Other.Head = NULL;
+                                 Other.Tail = NULL;
+                        
+                }                  
+                L2_Node& operator= (const L2_Node& Other)  {
+                                 struct Data<T>* Temp{},*New{},*Temp1;
+                                 if ( !Other.Head && !Other.Tail ) {
+                                        std::exit(1);
+                                 }
+                                 Temp = Other.Head->next;
+                                 Temp1 = Head;
+                                 Head->value = Other.Head->value;
+
+                                 while ( Temp ) {
+                                      New = new struct Data<T>;
+                                      New->value = Temp->value;
+                                      New->prev = Temp1;
+                                      New->next = NULL;  
+                                      Temp1->next = New;
+                                      Temp1 = Temp1->next;
+                                      Temp = Temp -> next;
+
+                                 };
+                           
+                                 Tail = New;
                                  return *this;
                 } 
 
@@ -233,5 +250,10 @@ template <typename T> void L2_Node<T>::Print() {
              }
              std::cout << std::endl;
 }
+
+
+
+
+
 
 

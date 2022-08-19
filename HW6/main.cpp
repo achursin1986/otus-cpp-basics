@@ -1,7 +1,19 @@
 #include<iostream>
+#include<vector>
 #include"serial_container.hpp"
 #include"l1_linked_container.hpp"
 #include"l2_linked_container.hpp"
+
+
+
+L2_Node<int> get_container(int value)
+{
+   L2_Node<int> cont(value);
+   return cont;
+
+}
+
+
 
 
 
@@ -10,7 +22,8 @@ int main(){
     S_Node<int> cont(10);
     L2_Node<int> cont2(0); // inited first element as 0
     L1_Node<int> cont3(0);
-    L2_Node<int> cont4(0); // for move and assign
+    L2_Node<int> cont4(0);
+    std::vector<L2_Node<int>> vec; 
 
     std::cout << "==============================" << std::endl;    
     std::cout << "->Serial container type:" << std::endl;
@@ -126,10 +139,22 @@ int main(){
 
 
     std::cout << "===========================================" << std::endl;
-    std::cout << "->Linked 2 way std::move with rvalue:" << std::endl;
+    std::cout << "->Linked 2 way move with rvalue:" << std::endl;
     std::cout << "===========================================" << std::endl;
-    cont4= std::move(cont2); //eating cont2 for cont4's profit
-    cont4.Print();
+    std::cout << "Creating vector of containers L2 with 1 element each..." << std::endl;
+    for ( int i =0 ; i<10; i++ ) {
+             vec.push_back(get_container(i));
+
+    }
+    std::cout << "Vector values: " << std::endl;
+    for ( int i =0 ; i<10; i++ ) {
+             vec[i].Print();
+    }
+    std::cout << std::endl;
+
+
+
+    cont4= std::move(cont2); 
     
 
 
