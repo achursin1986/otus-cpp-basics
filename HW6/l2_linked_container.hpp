@@ -60,7 +60,7 @@ template <typename T> class L2_Node {
                
                 L2_Node(int value) {
                      Head = new struct Data<T>;
-                     std::cout << "Allocate new node" << std::endl;
+                     std::cout << "L2_Node: allocate new node" << std::endl;
                      Head->value = value;
                      Head->prev = NULL;
                      Head->next = NULL;
@@ -116,7 +116,7 @@ template <typename T> class L2_Node {
                    
                 }
                 L2_Node(L2_Node&& Other)  {
-                                 std::cout << "move is called" << std::endl;
+                                 std::cout << "L2_Node: move is called" << std::endl;
                                  std::swap(Head, Other.Head);
                                  std::swap(Tail, Other.Tail);
                                  Other.Head = NULL;
