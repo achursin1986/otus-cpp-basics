@@ -20,7 +20,7 @@ template <typename T> class L1_Node {
                      Tail = Head;
                 }
                 ~L1_Node() {      
-                     struct Data1<T>*Temp,*Before{};
+                     struct Data1<T>*Temp,*Before;
                      Temp = Head;
                      while ( Temp ) {
                         Before = Temp;
