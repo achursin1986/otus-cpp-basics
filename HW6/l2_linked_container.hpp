@@ -124,13 +124,15 @@ template <typename T> class L2_Node {
                                  Other.Tail = NULL;
                         
                 } 
-                L2_Node& operator= (L2_Node&& Other) { 
+                L2_Node& operator= (L2_Node&& Other) {
                                  std::cout << "L2_Node: copy is called" << std::endl;
-                                 std::swap(Head, Other.Head);
-                                 std::swap(Tail, Other.Tail);
-                                 Other.Head = NULL;
-                                 Other.Tail = NULL;
-                                 return *this;
+                                 //std::swap(Head, Other.Head);
+                                 //std::swap(Tail, Other.Tail);
+                                 //delete Other.Head;
+                                 //Other.Head = NULL;
+                                 //Other.Tail = NULL;
+                                 L2_Node Temp{std::move(Other)};
+                                 return *this = Temp;
 
                 }                  
                 L2_Node& operator= (const L2_Node& Other)  {
@@ -260,10 +262,5 @@ template <typename T> void L2_Node<T>::Print() {
              }
              std::cout << std::endl;
 }
-
-
-
-
-
 
 

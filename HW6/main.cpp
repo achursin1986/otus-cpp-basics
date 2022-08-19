@@ -150,6 +150,16 @@ int main(){
     for ( int i =0 ; i<2; i++ ) {
              vec[i].Print();
     }
+    std::cout <<"==============" <<std::endl;
+    std::cout << std::endl;
+
+
+    vec[0] = std::move(vec[1]);
+    std::cout << "Vector values: " << std::endl;
+    for ( int i =0 ; i<2; i++ ) {
+             vec[i].Print();
+    }
+    std::cout <<"==============" <<std::endl;
     std::cout << std::endl;
 
 
