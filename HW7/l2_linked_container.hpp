@@ -72,8 +72,8 @@ template <typename T> class L2_Node {
                             delete Temp->next;
                             Temp = Temp->prev;
                      }
-                     delete Head;
                      }
+                     delete Head;
                 }
                 void Insert(int pos, T value);
 
