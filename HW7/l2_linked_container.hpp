@@ -65,22 +65,15 @@ template <typename T> class L2_Node {
                      Head->next = NULL;
                 }
                 ~L2_Node() {
-                     struct Data<T>* Temp,*Before;
-                     Temp = Head; 
+                     struct Data<T>* Temp;
+                     if ( Tail && Head ) {
+                     Temp = Tail->prev;                   
                      while ( Temp ) {
-                        Before = Temp; 
-                        Temp = Temp -> next;
+                            delete Temp->next;
+                            Temp = Temp->prev;
                      }
-                     Temp = Before;
-                     // need to walk the whole thing back
-                     while ( Temp ) {
-                        if ( Temp->next ) {
-                            delete Temp->next;         
-                        }
-                        Temp = Temp->prev;
+                     delete Head;
                      }
-                     delete Head;  
-                     
                 }
                 void Insert(int pos, T value);
 
@@ -124,8 +117,10 @@ template <typename T> class L2_Node {
                 L2_Node(L2_Node&& Other)  {
                                  std::swap(Head, Other.Head);
                                  std::swap(Tail, Other.Tail);
+                                 Other.Head = NULL;
+                                 Other.Tail = NULL;
                 }                
-                L2_Node& operator=  (const L2_Node& Other)  {
+                L2_Node& operator= (const L2_Node& Other)  {
                                  struct Data<T>* Temp{},*New{},*Temp1;
                                  if ( !Other.Head && !Other.Tail ) {
                                         std::exit(1);
@@ -137,7 +132,8 @@ template <typename T> class L2_Node {
                                  while ( Temp ) {
                                       New = new struct Data<T>;
                                       New->value = Temp->value;
-                                      New->prev = Temp1;  
+                                      New->prev = Temp1;
+                                      New->next = NULL;  
                                       Temp1->next = New;
                                       Temp1 = Temp1->next;
                                       Temp = Temp -> next;
@@ -145,7 +141,6 @@ template <typename T> class L2_Node {
                                  };
                            
                                  Tail = New;
-                                 Tail->next = NULL;
                                  return *this;
                 } 
 

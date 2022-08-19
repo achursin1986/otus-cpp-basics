@@ -13,7 +13,6 @@ int main(){
     L2_Node<int> cont4(0); // for move and assign
     L2_Node<int> cont5(0);
 
-    cont2.Print();
 
     std::cout << "==============================" << std::endl;    
     std::cout << "->Serial container type:" << std::endl;
@@ -22,9 +21,6 @@ int main(){
     for ( int i=0; i<10; i++ ) { 
            cont.Push_back(i);
     }
-    //cont.Insert(1,10); 
-
-
     cont.Print();
     std::cout << "Container size: " << cont.Size() <<std::endl;
 
@@ -93,7 +89,7 @@ int main(){
            cont3.Push_back(i);
     }
     cont3.Print();
-    std::cout << "Container Size: " << cont2.Size() << std::endl;
+    std::cout << "Container Size: " << cont3.Size() << std::endl;
 
     std::cout << "Remove 3,5,7th elements: " <<std::endl;
     cont3.Erase(3);
@@ -132,7 +128,7 @@ int main(){
     std::cout << "===========================================" << std::endl;
     std::cout << "->Linked 2 way std::move with rvalue:" << std::endl;
     std::cout << "===========================================" << std::endl;
-    cont4= std::move(cont2); //eating cont2 for cont4's profit
+    cont4=std::move(cont2); //eating cont2 for cont4's profit
     cont4.Print();
 
 
