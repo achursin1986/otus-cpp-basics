@@ -64,6 +64,15 @@ L2_Node: destroy node
 Vector values: 
 0 
 1 
+==============
+
+L2_Node: copy is called
+L2_Node: move is called
+L2_Node: destroy node
+Vector values: 
+1 
+
+==============
 
 L2_Node: destroy node
 L2_Node: destroy node
