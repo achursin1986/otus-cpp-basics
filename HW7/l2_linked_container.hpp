@@ -126,8 +126,6 @@ template <typename T> class L2_Node {
                                  std::swap(Tail, Other.Tail);
                 }                
                 L2_Node& operator=  (const L2_Node& Other)  {
-                                 //std::swap(Head, Other.Head);
-                                 //std::swap(Tail, Other.Tail);
                                  struct Data<T>* Temp{},*New{},*Temp1;
                                  if ( !Other.Head && !Other.Tail ) {
                                         std::exit(1);
@@ -139,11 +137,13 @@ template <typename T> class L2_Node {
                                  while ( Temp ) {
                                       New = new struct Data<T>;
                                       New->value = Temp->value;
+                                      New->prev = Temp1;  
                                       Temp1->next = New;
                                       Temp1 = Temp1->next;
                                       Temp = Temp -> next;
 
                                  };
+                           
                                  Tail = New;
                                  Tail->next = NULL;
                                  return *this;
