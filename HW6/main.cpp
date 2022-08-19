@@ -142,19 +142,19 @@ int main(){
     std::cout << "->Linked 2 way move with rvalue:" << std::endl;
     std::cout << "===========================================" << std::endl;
     std::cout << "Creating vector of containers L2 with 1 element each..." << std::endl;
-    for ( int i =0 ; i<10; i++ ) {
+    for ( int i =0 ; i<2; i++ ) {
              vec.push_back(get_container(i));
 
     }
     std::cout << "Vector values: " << std::endl;
-    for ( int i =0 ; i<10; i++ ) {
+    for ( int i =0 ; i<2; i++ ) {
              vec[i].Print();
     }
     std::cout << std::endl;
 
 
 
-    cont4= std::move(cont2); 
+    //cont4= std::move(cont2); 
     
 
 

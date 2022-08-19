@@ -67,6 +67,7 @@ template <typename T> class L2_Node {
                 }
                 ~L2_Node() {
                      struct Data<T>* Temp;
+                     std::cout << "L2_Node: destroy node" << std::endl;
                      if ( Tail && Head ) {
                      Temp = Tail->prev;                   
                      while ( Temp ) {
@@ -122,6 +123,15 @@ template <typename T> class L2_Node {
                                  Other.Head = NULL;
                                  Other.Tail = NULL;
                         
+                } 
+                L2_Node& operator= (L2_Node&& Other) { 
+                                 std::cout << "L2_Node: copy is called" << std::endl;
+                                 std::swap(Head, Other.Head);
+                                 std::swap(Tail, Other.Tail);
+                                 Other.Head = NULL;
+                                 Other.Tail = NULL;
+                                 return *this;
+
                 }                  
                 L2_Node& operator= (const L2_Node& Other)  {
                                  struct Data<T>* Temp{},*New{},*Temp1;
