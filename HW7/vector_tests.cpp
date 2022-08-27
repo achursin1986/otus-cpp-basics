@@ -4,27 +4,38 @@
 
 using namespace std;
 
-/*
-template <typename T> class Mocker : private vector<int> {
-public:
-    Mocker(): vector<T>() {}
-    MOCK_METHOD(void, Die, ());
-     ~Mocker() { Die(); }
-
-};
-*/
 
 class Mocker : public vector<int> {
 
 public:
     Mocker(): vector<int>() {}
+ 
     MOCK_METHOD(void, Die, ());
      ~Mocker() { Die(); }
 
-}; 
+};
 
 
+class Mock {
+public:
+     MOCK_METHOD(void, Die, ());
 
+
+};
+
+
+class DtorTest {
+public:
+    DtorTest(Mock& counter)
+        : counter_{counter}
+    {}
+
+    ~DtorTest() {
+         counter_.Die();
+    }
+private:
+    Mock& counter_;
+};
 
 
 
@@ -160,6 +171,23 @@ TEST(vector,container_int_delete) {
 
 
 
+TEST(vector,container_n_destructor_call) {
+            vector<DtorTest> vec;
+            Mock counter;
+            for ( int i=0; i<10; i++ ) {
+                     vec.push_back(DtorTest(counter));
+
+             }
+             EXPECT_CALL(counter, Die()).Times(19);
+  
+             
+}
+
+
+
+
+
+
 TEST(vector,container_int_move) {
 
             vector<int> vec1;
@@ -169,8 +197,6 @@ TEST(vector,container_int_move) {
             }
             vec1= std::move(vec);
             EXPECT_CALL(vec, Die());
-           
-                        
 
 }
 
