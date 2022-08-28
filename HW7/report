@@ -1,4 +1,4 @@
-[==========] Running 22 tests from 2 test suites.
+[==========] Running 24 tests from 2 test suites.
 [----------] Global test environment set-up.
 [----------] 11 tests from L2_linked
 [ RUN      ] L2_linked.creation_with_int0
@@ -25,7 +25,7 @@
 [       OK ] L2_linked.container_int_move (0 ms)
 [----------] 11 tests from L2_linked (0 ms total)
 
-[----------] 11 tests from vector
+[----------] 13 tests from vector
 [ RUN      ] vector.creation_with_int0
 [       OK ] vector.creation_with_int0 (0 ms)
 [ RUN      ] vector.creation_with_double5
@@ -46,10 +46,14 @@
 [       OK ] vector.container_int_copy (0 ms)
 [ RUN      ] vector.container_int_delete
 [       OK ] vector.container_int_delete (0 ms)
+[ RUN      ] vector.container_n_destructor_call_emplace
+[       OK ] vector.container_n_destructor_call_emplace (0 ms)
+[ RUN      ] vector.container_n_destructor_call_pushback
+[       OK ] vector.container_n_destructor_call_pushback (0 ms)
 [ RUN      ] vector.container_int_move
 [       OK ] vector.container_int_move (0 ms)
-[----------] 11 tests from vector (0 ms total)
+[----------] 13 tests from vector (0 ms total)
 
 [----------] Global test environment tear-down
-[==========] 22 tests from 2 test suites ran. (0 ms total)
-[  PASSED  ] 22 tests.
+[==========] 24 tests from 2 test suites ran. (0 ms total)
+[  PASSED  ] 24 tests.
