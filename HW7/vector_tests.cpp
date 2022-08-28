@@ -24,7 +24,7 @@ public:
 };
 
 
-class DtorTest {
+class DtorTest  {
 public:
     DtorTest(Mock& counter)
         : counter_{counter}
@@ -32,8 +32,8 @@ public:
 
     ~DtorTest() {
          counter_.Die();
+        
     }
-private:
     Mock& counter_;
 };
 
@@ -160,27 +160,40 @@ TEST(vector,container_int_copy) {
 
 
 TEST(vector,container_int_delete) {
-            //using ::testing::Mock;
+            //::testing::Mock::VerifyAndClearExpectations(&vec);
             Mocker vec;
             for ( int i=0; i<10; i++ ) {
                      vec.push_back(i);
              }
              EXPECT_CALL(vec, Die());
-             //Mock::VerifyAndClearExpectations(&vec);
 }
 
 
 
-TEST(vector,container_n_destructor_call) {
-            vector<DtorTest> vec;
+TEST(vector,container_n_destructor_call_emplace) {
             Mock counter;
+            EXPECT_CALL(counter, Die()).Times(10);
+            vector<DtorTest> vec;
+            vec.reserve(10);
             for ( int i=0; i<10; i++ ) {
-                     vec.push_back(DtorTest(counter));
+                     vec.emplace_back(counter);
+                
+             }
+  
+
+}
+
+TEST(vector,container_n_destructor_call_pushback) {
+            Mock counter;
+            EXPECT_CALL(counter, Die()).Times(20); // push back does copies, so destructions count is 2n 
+            vector<DtorTest> vec;
+            vec.reserve(10);
+            for ( int i=0; i<10; i++ ) {
+                     vec.push_back(counter);
 
              }
-             EXPECT_CALL(counter, Die()).Times(19);
-  
-             
+
+
 }
 
 
