@@ -1,0 +1,917 @@
+{
+    "isis-database-information" : [
+    {
+        "attributes" : {"xmlns" : "http://xml.juniper.net/junos/21.3R0/junos-routing",
+                        "junos:style" : "extensive"
+                       },
+        "isis-database" : [
+        {
+            "level" : [
+            {
+                "data" : "1"
+            }
+            ]
+        },
+        {
+            "level" : [
+            {
+                "data" : "2"
+            }
+            ],
+            "isis-database-entry" : [
+            {
+                "lsp-id" : [
+                {
+                    "data" : "vmx1.00-00"
+                }
+                ],
+                "sequence-number" : [
+                {
+                    "data" : "0x5"
+                }
+                ],
+                "checksum" : [
+                {
+                    "data" : "0x387c"
+                }
+                ],
+                "remaining-lifetime" : [
+                {
+                    "data" : "982"
+                }
+                ],
+                "isis-node-segment" : [
+                {
+                }
+                ],
+                "isis-neighbor" : [
+                {
+                    "is-neighbor-id" : [
+                    {
+                        "data" : "xrv9000.00"
+                    }
+                    ],
+                    "metric" : [
+                    {
+                        "data" : "10"
+                    }
+                    ],
+                    "two-way-lsp-id" : [
+                    {
+                        "data" : "xrv9000.00-00"
+                    }
+                    ],
+                    "firstfrag-lsp-id" : [
+                    {
+                        "data" : "xrv9000.00-00"
+                    }
+                    ]
+                }
+                ],
+                "isis-prefix" : [
+                {
+                    "attributes" : {"xmlns" : "http://xml.juniper.net/junos/21.3R0/junos-routing",
+                                    "junos:style" : "normal"
+                                   },
+                    "protocol-name" : [
+                    {
+                        "data" : "IP"
+                    }
+                    ],
+                    "address-prefix" : [
+                    {
+                        "data" : "10.2.0.0/31"
+                    }
+                    ],
+                    "metric" : [
+                    {
+                        "data" : "10"
+                    }
+                    ],
+                    "prefix-flag" : [
+                    {
+                        "data" : "Internal"
+                    }
+                    ],
+                    "prefix-status" : [
+                    {
+                        "data" : "up"
+                    }
+                    ]
+                },
+                {
+                    "attributes" : {"xmlns" : "http://xml.juniper.net/junos/21.3R0/junos-routing",
+                                    "junos:style" : "normal"
+                                   },
+                    "protocol-name" : [
+                    {
+                        "data" : "IP"
+                    }
+                    ],
+                    "address-prefix" : [
+                    {
+                        "data" : "10.3.0.0/31"
+                    }
+                    ],
+                    "metric" : [
+                    {
+                        "data" : "10"
+                    }
+                    ],
+                    "prefix-flag" : [
+                    {
+                        "data" : "Internal"
+                    }
+                    ],
+                    "prefix-status" : [
+                    {
+                        "data" : "up"
+                    }
+                    ]
+                },
+                {
+                    "attributes" : {"xmlns" : "http://xml.juniper.net/junos/21.3R0/junos-routing",
+                                    "junos:style" : "normal"
+                                   },
+                    "protocol-name" : [
+                    {
+                        "data" : "IP"
+                    }
+                    ],
+                    "address-prefix" : [
+                    {
+                        "data" : "101.101.101.101/32"
+                    }
+                    ],
+                    "metric" : [
+                    {
+                        "data" : "0"
+                    }
+                    ],
+                    "prefix-flag" : [
+                    {
+                        "data" : "Internal"
+                    }
+                    ],
+                    "prefix-status" : [
+                    {
+                        "data" : "up"
+                    }
+                    ]
+                }
+                ],
+                "isis-header" : [
+                {
+                    "lsp-id" : [
+                    {
+                        "data" : "vmx1.00-00"
+                    }
+                    ],
+                    "pdu-length" : [
+                    {
+                        "data" : "182"
+                    }
+                    ],
+                    "allocated-length" : [
+                    {
+                        "data" : "1492"
+                    }
+                    ],
+                    "router-id" : [
+                    {
+                        "data" : "101.101.101.101"
+                    }
+                    ],
+                    "remaining-lifetime" : [
+                    {
+                        "data" : "982"
+                    }
+                    ],
+                    "level" : [
+                    {
+                        "data" : "2"
+                    }
+                    ],
+                    "interface-index" : [
+                    {
+                        "data" : "0"
+                    }
+                    ],
+                    "estimated-free-bytes" : [
+                    {
+                        "data" : "1208"
+                    }
+                    ],
+                    "actual-free-bytes" : [
+                    {
+                        "data" : "1310"
+                    }
+                    ],
+                    "lsdb-timer-type" : [
+                    {
+                        "data" : "Aging"
+                    }
+                    ],
+                    "lsdb-expiration-time" : [
+                    {
+                        "data" : "982"
+                    }
+                    ],
+                    "protocol" : [
+                    {
+                        "data" : "IP, IPv6"
+                    }
+                    ]
+                }
+                ],
+                "isis-packet" : [
+                {
+                    "lsp-id" : [
+                    {
+                        "data" : "vmx1.00-00"
+                    }
+                    ],
+                    "pdu-length" : [
+                    {
+                        "data" : "182"
+                    }
+                    ],
+                    "pdu-lifetime" : [
+                    {
+                        "data" : "1198"
+                    }
+                    ],
+                    "checksum" : [
+                    {
+                        "data" : "0x387c"
+                    }
+                    ],
+                    "sequence-number" : [
+                    {
+                        "data" : "0x5"
+                    }
+                    ],
+                    "lsp-attributes" : [
+                    {
+                        "data" : "0x3 &lt;L1 L2&gt;"
+                    }
+                    ],
+                    "nlp-id" : [
+                    {
+                        "data" : "0x83"
+                    }
+                    ],
+                    "lsp-length" : [
+                    {
+                        "data" : "27"
+                    }
+                    ],
+                    "pdu-version" : [
+                    {
+                        "data" : "1"
+                    }
+                    ],
+                    "system-id-length" : [
+                    {
+                        "data" : "0"
+                    }
+                    ],
+                    "isis-packet-type" : [
+                    {
+                        "data" : "20"
+                    }
+                    ],
+                    "packet-version" : [
+                    {
+                        "data" : "1"
+                    }
+                    ],
+                    "maximum-area" : [
+                    {
+                        "data" : "0"
+                    }
+                    ]
+                }
+                ],
+                "isis-tlv" : [
+                {
+                    "attributes" : {"heading" : "  TLVs:"},
+                    "area-address-tlv" : [
+                    {
+                        "address" : [
+                        {
+                            "data" : "49.0001"
+                        }
+                        ],
+                        "tlv-length" : [
+                        {
+                            "data" : "3"
+                        }
+                        ]
+                    }
+                    ],
+                    "lsp-buffer-size-tlv" : [
+                    {
+                        "lsp-buffer-size" : [
+                        {
+                            "data" : "1492"
+                        }
+                        ]
+                    }
+                    ],
+                    "protocols-tlv" : [
+                    {
+                        "protocol" : [
+                        {
+                            "data" : "Speaks: IP"
+                        },
+                        {
+                            "data" : "Speaks: IPV6"
+                        }
+                        ]
+                    }
+                    ],
+                    "router-id-tlv" : [
+                    {
+                        "router-id" : [
+                        {
+                            "data" : "101.101.101.101"
+                        }
+                        ]
+                    }
+                    ],
+                    "ipaddress-tlv" : [
+                    {
+                        "address" : [
+                        {
+                            "data" : "101.101.101.101"
+                        }
+                        ]
+                    }
+                    ],
+                    "hostname-tlv" : [
+                    {
+                        "hostname" : [
+                        {
+                            "data" : "vmx1"
+                        }
+                        ]
+                    }
+                    ],
+                    "rtr-capability-tlv" : [
+                    {
+                        "attributes" : {"heading" : "Router Capability: "},
+                        "router-id" : [
+                        {
+                            "data" : "101.101.101.101"
+                        }
+                        ],
+                        "rtr-cap-flags" : [
+                        {
+                            "data" : "0x00"
+                        }
+                        ]
+                    }
+                    ],
+                    "reachability-tlv" : [
+                    {
+                        "attributes" : {"heading" : "IP prefix:"},
+                        "address-prefix" : [
+                        {
+                            "data" : "101.101.101.101/32"
+                        }
+                        ],
+                        "metric-flag" : [
+                        {
+                            "data" : "Internal"
+                        }
+                        ],
+                        "metric" : [
+                        {
+                            "data" : "0"
+                        }
+                        ],
+                        "prefix-status" : [
+                        {
+                            "data" : "up"
+                        }
+                        ]
+                    },
+                    {
+                        "attributes" : {"heading" : "IP prefix:"},
+                        "address-prefix" : [
+                        {
+                            "data" : "10.3.0.0/31"
+                        }
+                        ],
+                        "metric-flag" : [
+                        {
+                            "data" : "Internal"
+                        }
+                        ],
+                        "metric" : [
+                        {
+                            "data" : "10"
+                        }
+                        ],
+                        "prefix-status" : [
+                        {
+                            "data" : "up"
+                        }
+                        ]
+                    },
+                    {
+                        "attributes" : {"heading" : "IP prefix:"},
+                        "address-prefix" : [
+                        {
+                            "data" : "10.2.0.0/31"
+                        }
+                        ],
+                        "metric-flag" : [
+                        {
+                            "data" : "Internal"
+                        }
+                        ],
+                        "metric" : [
+                        {
+                            "data" : "10"
+                        }
+                        ],
+                        "prefix-status" : [
+                        {
+                            "data" : "up"
+                        }
+                        ]
+                    }
+                    ],
+                    "ip-prefix-tlv" : [
+                    {
+                        "attributes" : {"heading" : "IP extended prefix:"},
+                        "address-prefix" : [
+                        {
+                            "data" : "101.101.101.101/32"
+                        }
+                        ],
+                        "metric" : [
+                        {
+                            "data" : "0"
+                        }
+                        ],
+                        "prefix-status" : [
+                        {
+                            "data" : "up"
+                        }
+                        ]
+                    },
+                    {
+                        "attributes" : {"heading" : "IP extended prefix:"},
+                        "address-prefix" : [
+                        {
+                            "data" : "10.3.0.0/31"
+                        }
+                        ],
+                        "metric" : [
+                        {
+                            "data" : "10"
+                        }
+                        ],
+                        "prefix-status" : [
+                        {
+                            "data" : "up"
+                        }
+                        ]
+                    },
+                    {
+                        "attributes" : {"heading" : "IP extended prefix:"},
+                        "address-prefix" : [
+                        {
+                            "data" : "10.2.0.0/31"
+                        }
+                        ],
+                        "metric" : [
+                        {
+                            "data" : "10"
+                        }
+                        ],
+                        "prefix-status" : [
+                        {
+                            "data" : "up"
+                        }
+                        ]
+                    }
+                    ],
+                    "reachability-tlv" : [
+                    {
+                        "attributes" : {"heading" : "IS neighbor:"},
+                        "address-prefix" : [
+                        {
+                            "data" : "xrv9000.00"
+                        }
+                        ],
+                        "metric-flag" : [
+                        {
+                            "data" : "Internal"
+                        }
+                        ],
+                        "metric" : [
+                        {
+                            "data" : "10"
+                        }
+                        ]
+                    }
+                    ],
+                    "ext-reachability-tlv" : [
+                    {
+                        "isis-tlv-type" : [
+                        {
+                            "data" : "22"
+                        }
+                        ],
+                        "tlv-length" : [
+                        {
+                            "data" : "33"
+                        }
+                        ]
+                    }
+                    ],
+                    "reachability-tlv" : [
+                    {
+                        "attributes" : {"heading" : "IS extended neighbor:"},
+                        "address-prefix" : [
+                        {
+                            "data" : "xrv9000.00"
+                        }
+                        ],
+                        "metric" : [
+                        {
+                            "data" : "10"
+                        }
+                        ],
+                        "subtlv-length" : [
+                        {
+                            "data" : "22"
+                        }
+                        ],
+                        "isis-reachability-subtlv" : [
+                        {
+                            "address" : [
+                            {
+                                "data" : "10.2.0.0"
+                            }
+                            ]
+                        },
+                        {
+                            "neighbor-prefix" : [
+                            {
+                                "data" : "10.2.0.1"
+                            }
+                            ]
+                        },
+                        {
+                            "local-ifindex" : [
+                            {
+                                "data" : "335"
+                            }
+                            ],
+                            "remote-ifindex" : [
+                            {
+                                "data" : "8"
+                            }
+                            ]
+                        }
+                        ]
+                    }
+                    ]
+                }
+                ],
+                "transmission-status" : [
+                {
+                    "message" : [
+                    {
+                        "data" : "No queued transmissions"
+                    }
+                    ]
+                }
+                ]
+            },
+            {
+                "lsp-id" : [
+                {
+                    "data" : "xrv9000.00-00"
+                }
+                ],
+                "sequence-number" : [
+                {
+                    "data" : "0x8"
+                }
+                ],
+                "checksum" : [
+                {
+                    "data" : "0x1a21"
+                }
+                ],
+                "remaining-lifetime" : [
+                {
+                    "data" : "936"
+                }
+                ],
+                "isis-node-segment" : [
+                {
+                }
+                ],
+                "isis-neighbor" : [
+                {
+                    "is-neighbor-id" : [
+                    {
+                        "data" : "vmx1.00"
+                    }
+                    ],
+                    "metric" : [
+                    {
+                        "data" : "10"
+                    }
+                    ],
+                    "two-way-lsp-id" : [
+                    {
+                        "data" : "vmx1.00-00"
+                    }
+                    ],
+                    "firstfrag-lsp-id" : [
+                    {
+                        "data" : "vmx1.00-00"
+                    }
+                    ]
+                }
+                ],
+                "isis-prefix" : [
+                {
+                    "attributes" : {"xmlns" : "http://xml.juniper.net/junos/21.3R0/junos-routing",
+                                    "junos:style" : "normal"
+                                   },
+                    "protocol-name" : [
+                    {
+                        "data" : "IP"
+                    }
+                    ],
+                    "address-prefix" : [
+                    {
+                        "data" : "10.2.0.0/31"
+                    }
+                    ],
+                    "metric" : [
+                    {
+                        "data" : "10"
+                    }
+                    ],
+                    "prefix-flag" : [
+                    {
+                        "data" : "Internal"
+                    }
+                    ],
+                    "prefix-status" : [
+                    {
+                        "data" : "up"
+                    }
+                    ]
+                }
+                ],
+                "isis-header" : [
+                {
+                    "lsp-id" : [
+                    {
+                        "data" : "xrv9000.00-00"
+                    }
+                    ],
+                    "pdu-length" : [
+                    {
+                        "data" : "79"
+                    }
+                    ],
+                    "allocated-length" : [
+                    {
+                        "data" : "284"
+                    }
+                    ],
+                    "router-id" : [
+                    {
+                        "data" : "0.0.0.0"
+                    }
+                    ],
+                    "remaining-lifetime" : [
+                    {
+                        "data" : "936"
+                    }
+                    ],
+                    "level" : [
+                    {
+                        "data" : "2"
+                    }
+                    ],
+                    "interface-index" : [
+                    {
+                        "data" : "335"
+                    }
+                    ],
+                    "estimated-free-bytes" : [
+                    {
+                        "data" : "257"
+                    }
+                    ],
+                    "actual-free-bytes" : [
+                    {
+                        "data" : "205"
+                    }
+                    ],
+                    "lsdb-timer-type" : [
+                    {
+                        "data" : "Aging"
+                    }
+                    ],
+                    "lsdb-expiration-time" : [
+                    {
+                        "data" : "936"
+                    }
+                    ],
+                    "protocol" : [
+                    {
+                        "data" : "IP"
+                    }
+                    ]
+                }
+                ],
+                "isis-packet" : [
+                {
+                    "lsp-id" : [
+                    {
+                        "data" : "xrv9000.00-00"
+                    }
+                    ],
+                    "pdu-length" : [
+                    {
+                        "data" : "79"
+                    }
+                    ],
+                    "pdu-lifetime" : [
+                    {
+                        "data" : "1200"
+                    }
+                    ],
+                    "checksum" : [
+                    {
+                        "data" : "0x1a21"
+                    }
+                    ],
+                    "sequence-number" : [
+                    {
+                        "data" : "0x8"
+                    }
+                    ],
+                    "lsp-attributes" : [
+                    {
+                        "data" : "0x3 &lt;L1 L2&gt;"
+                    }
+                    ],
+                    "nlp-id" : [
+                    {
+                        "data" : "0x83"
+                    }
+                    ],
+                    "lsp-length" : [
+                    {
+                        "data" : "27"
+                    }
+                    ],
+                    "pdu-version" : [
+                    {
+                        "data" : "1"
+                    }
+                    ],
+                    "system-id-length" : [
+                    {
+                        "data" : "0"
+                    }
+                    ],
+                    "isis-packet-type" : [
+                    {
+                        "data" : "20"
+                    }
+                    ],
+                    "packet-version" : [
+                    {
+                        "data" : "1"
+                    }
+                    ],
+                    "maximum-area" : [
+                    {
+                        "data" : "0"
+                    }
+                    ]
+                }
+                ],
+                "isis-tlv" : [
+                {
+                    "attributes" : {"heading" : "  TLVs:"},
+                    "area-address-tlv" : [
+                    {
+                        "address" : [
+                        {
+                            "data" : "49.0002"
+                        }
+                        ],
+                        "tlv-length" : [
+                        {
+                            "data" : "3"
+                        }
+                        ]
+                    }
+                    ],
+                    "protocols-tlv" : [
+                    {
+                        "protocol" : [
+                        {
+                            "data" : "Speaks: IP"
+                        }
+                        ]
+                    }
+                    ],
+                    "hostname-tlv" : [
+                    {
+                        "hostname" : [
+                        {
+                            "data" : "xrv9000"
+                        }
+                        ]
+                    }
+                    ],
+                    "reachability-tlv" : [
+                    {
+                        "attributes" : {"heading" : "IP prefix:"},
+                        "address-prefix" : [
+                        {
+                            "data" : "10.2.0.0/31"
+                        }
+                        ],
+                        "metric-flag" : [
+                        {
+                            "data" : "Internal"
+                        }
+                        ],
+                        "metric" : [
+                        {
+                            "data" : "10"
+                        }
+                        ],
+                        "prefix-status" : [
+                        {
+                            "data" : "up"
+                        }
+                        ]
+                    }
+                    ],
+                    "ipaddress-tlv" : [
+                    {
+                        "address" : [
+                        {
+                            "data" : "10.2.0.1"
+                        }
+                        ]
+                    }
+                    ],
+                    "reachability-tlv" : [
+                    {
+                        "attributes" : {"heading" : "IS neighbor:"},
+                        "address-prefix" : [
+                        {
+                            "data" : "vmx1.00"
+                        }
+                        ],
+                        "metric-flag" : [
+                        {
+                            "data" : "Internal"
+                        }
+                        ],
+                        "metric" : [
+                        {
+                            "data" : "10"
+                        }
+                        ]
+                    }
+                    ]
+                }
+                ],
+                "transmission-status" : [
+                {
+                    "message" : [
+                    {
+                        "data" : "No queued transmissions"
+                    }
+                    ]
+                }
+                ]
+            }
+            ]
+        }
+        ]
+    }
+    ]
+}

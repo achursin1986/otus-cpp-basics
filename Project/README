@@ -1,0 +1,89 @@
+ISIS database replicator app
+Nov 2022
+-------------------------------------------------------------------------------------------------------------------
+Tool allowing replication (injection) of exported ISIS database in json format to a real router. 
+ONLY L2 P2P adjacency supported, only Linux OS. App requires the following libs as dependancies:
+- boost::asio;
+- gtest(only for tests binary).
+
+App uses the following parameters as encoded:
+
+MAC address: 00:0c:29:6f:14:bf
+NET address: 0001.0000.0001.00
+AREA address: 49.0001
+IP address/mask: 10.100.0.0 255.255.255.254   
+
+
+usage: 
+- get 2 outputs from Junos router:
+    show isis database extensive | display json | no-more
+    show isis hostname | no-more
+
+  From the second command grab first 2 columns and save to subs.txt (each pair on a new line), for example:
+  0001.0001.0001 vmx1
+  
+   Use attached script prepare_json.sh to create valid json, for example 
+   ./prepare_json.sh subs.txt simple.json   <---- simple.json is json file taken by the first command
+   Result file is ready_for_repl.json, use it for the program input. 
+
+
+-  Run the program providing json file and nic name, for example:
+   ./repl eth0 ready_for_repl.json
+
+
+DUT(device under test) router config example:
+
+Cisco XR
+
+router isis 1
+ net 49.0003.0003.0003.0003.00
+ max-lsp-lifetime 65535
+ address-family ipv4 unicast
+ !
+ interface GigabitEthernet0/0/0/1
+  circuit-type level-2-only
+  point-to-point
+  address-family ipv4 unicast
+  !
+
+interface GigabitEthernet0/0/0/1
+ ipv4 address 10.100.0.0 255.255.255.254
+!
+
+Junos 
+
+interfaces {
+      lo0 {
+        unit 0 {
+            family iso {
+                address 49.0004.0004.0004.0004.00;
+            }
+        }
+      ge-0/0/1 {
+        unit 0 {
+            family inet {
+                address 10.100.0.0/31;
+            }
+            family iso;
+        }
+    }
+}
+
+protocols {
+      isis {
+        interface ge-0/0/1.0 {
+            point-to-point;
+        }
+        interface lo0.0;
+        level 1 disable;
+     }
+}
+
+
+
+-------------------------------------------------------------------------------------------------------------------
+License
+
+ISIS database replicator(repl binary) is Open Source software. It may be used for any purpose, including commercial purposes, at absolutely no cost. It is distributed under the terms of the MIT license.
+
+
