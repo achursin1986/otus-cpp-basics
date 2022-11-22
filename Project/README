@@ -1,6 +1,6 @@
 ISIS database replicator app
 Nov 2022
--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------
 Tool allowing replication (injection) of exported ISIS database in json format to a real router. 
 ONLY L2 P2P adjacency supported, only Linux OS. App requires the following libs as dependancies:
 - boost::asio;
@@ -11,7 +11,7 @@ App uses the following parameters as encoded:
 MAC address: 00:0c:29:6f:14:bf
 NET address: 0001.0000.0001.00
 AREA address: 49.0001
-IP address/mask: 10.100.0.0 255.255.255.254   
+IP address/mask: 10.100.0.1 255.255.255.254   
 
 
 usage: 
@@ -81,7 +81,7 @@ protocols {
 
 
 
--------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------
 License
 
 ISIS database replicator(repl binary) is Open Source software. It may be used for any purpose, including commercial purposes, at absolutely no cost. It is distributed under the terms of the MIT license.
