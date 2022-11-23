@@ -34,14 +34,15 @@ void parse(std::map<std::string,std::string>& lsdb, std::string file_json) {
       } 
 
       for ( int i=0; i<int(keys.size()); ++i )   {
-                  unsigned short eth_length{0},pdu_length{0},remaining_lifetime{0};
-                  uint32_t sequence_number;
+                  unsigned short eth_length{0},pdu_length{0},tlv_length{0},remaining_lifetime{0};
+                  uint32_t sequence_number{0};
                   boost::asio::streambuf checksum_pdu;
                   std::ostream os_checksum(&checksum_pdu);
                   boost::asio::streambuf tlvs;
                   std::ostream os_tlvs(&tlvs);
                   boost::asio::streambuf packet;
                   std::ostream os(&packet);
+
 
                   eth_header eth;
                   isis_header isis;
@@ -53,11 +54,11 @@ void parse(std::map<std::string,std::string>& lsdb, std::string file_json) {
                   std::cout << "LSP-ID " << lsp_id << std::endl;
                   boost::erase_all(lsp_id,".");
                   boost::erase_all(lsp_id,"-");
-                  sequence_number = htonl(std::stoi((std::string(data[i]["sequence-number"][0]["data"]).erase(0,2)),0,16));
+                  sequence_number = htonl(std::stol((std::string(data[i]["sequence-number"][0]["data"]).erase(0,2)),0,16));
                   unsigned char sn_temp[4]{0};
                   std::memcpy(sn_temp, &sequence_number, 4);
                   lsp_header.remaining_lifetime(htons(remaining_lifetime));
-                  lsp_header.sequnce_num(sn_temp);
+                  lsp_header.sequence_num(sn_temp);
                   unsigned char lsp_id_temp[16]{0},lsp_id_packed[8]{0};
                   std::memcpy(lsp_id_temp, lsp_id.c_str(), lsp_id.size());
                   for (int j=0; j<16; ++j) {
@@ -77,7 +78,7 @@ void parse(std::map<std::string,std::string>& lsdb, std::string file_json) {
                             std::string hostname_str = std::string(data[i]["isis-tlv"][0]["hostname-tlv"][0]["hostname"][0]["data"]);
                             boost::erase_all(hostname_str,".");
                             boost::erase_all(hostname_str,"-");
-                            std::shared_ptr<unsigned char[]> hostname_temp_ptr(new unsigned char[hostname_str.size()]{});
+                            std::unique_ptr<unsigned char[]> hostname_temp_ptr(new unsigned char[hostname_str.size()]{});
                             unsigned char* hostname_temp = hostname_temp_ptr.get();
                             std::cout << "hostname: " << hostname_str << std::endl;
                             std::memcpy(hostname_temp, hostname_str.c_str(), hostname_str.size());
@@ -87,32 +88,33 @@ void parse(std::map<std::string,std::string>& lsdb, std::string file_json) {
                             pdu_length += sizeof(hostname);  hostname is special as not fixed, only caped by 255 bytes */
                             eth_length += hostname_str.size()+2;
                             pdu_length += hostname_str.size()+2;
+                            tlv_length += hostname_str.size()+2;
+                            //os_checksum << std::string(reinterpret_cast<char const*>(hostname.data()),hostname.tlv_length()+2);
+                            //os_tlvs << std::string(reinterpret_cast<char const*>(hostname.data()),hostname.tlv_length()+2);
                             os_checksum << hostname;
                             os_tlvs << hostname;
-                  }
+                  } else {  std::cout << "hostname no found " << std::endl; break; } 
+                  
 
                   eth.length(eth_length);
                   lsp_header.pdu_length(htons(pdu_length));
                   /* calculating checksum */
-                  std::istream is_checksum(&checksum_pdu);
-                  std::string checksum_str;
-                  std::getline(is_checksum,checksum_str);
-                  std::shared_ptr<unsigned char[]> checksum_temp_ptr(new unsigned char[checksum_str.size()]{});
+                  std::string checksum_str(boost::asio::buffers_begin(checksum_pdu.data()),
+                boost::asio::buffers_begin(checksum_pdu.data()) + checksum_pdu.size());
+                  std::unique_ptr<unsigned char[]> checksum_temp_ptr(new unsigned char[checksum_str.size()]{});
                   unsigned char* checksum_temp = checksum_temp_ptr.get();
+
                   std::memcpy(checksum_temp, checksum_str.c_str(), checksum_str.size());
                   unsigned short checksum = htons(fletcher_checksum(checksum_temp+12,checksum_str.size()-12,12));
                   lsp_header.checksum(htons(checksum));
 
 
                   /* constructing final packet */
-                  std::istream is_tlvs(&tlvs);
-                  std::string tlvs_str;
-                  std::getline(is_tlvs,tlvs_str);
+                  std::string tlvs_str(boost::asio::buffers_begin(tlvs.data()),
+                boost::asio::buffers_begin(tlvs.data()) + tlvs.size());
                   os << eth << isis << lsp_header << tlvs_str;
-
-                  std::istream is(&packet);
-                  std::string packet_str;
-                  std::getline(is,packet_str);
+                  std::string packet_str(boost::asio::buffers_begin(packet.data()),
+                boost::asio::buffers_begin(packet.data()) + packet.size());
 
                   /* saving packet to db */
                   lsdb.insert(std::pair<std::string,std::string>(keys[i],packet_str)); 
