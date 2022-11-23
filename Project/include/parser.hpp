@@ -34,7 +34,7 @@ void parse(std::map<std::string,std::string>& lsdb, std::string file_json) {
       } 
 
       for ( int i=0; i<int(keys.size()); ++i )   {
-                  unsigned short eth_length{0},pdu_length{0},tlv_length{0},remaining_lifetime{0};
+                  unsigned short eth_length{0},pdu_length{0},remaining_lifetime{0};
                   uint32_t sequence_number{0};
                   boost::asio::streambuf checksum_pdu;
                   std::ostream os_checksum(&checksum_pdu);
@@ -88,9 +88,6 @@ void parse(std::map<std::string,std::string>& lsdb, std::string file_json) {
                             pdu_length += sizeof(hostname);  hostname is special as not fixed, only caped by 255 bytes */
                             eth_length += hostname_str.size()+2;
                             pdu_length += hostname_str.size()+2;
-                            tlv_length += hostname_str.size()+2;
-                            //os_checksum << std::string(reinterpret_cast<char const*>(hostname.data()),hostname.tlv_length()+2);
-                            //os_tlvs << std::string(reinterpret_cast<char const*>(hostname.data()),hostname.tlv_length()+2);
                             os_checksum << hostname;
                             os_tlvs << hostname;
                   } else {  std::cout << "hostname no found " << std::endl; break; } 
