@@ -723,7 +723,7 @@ class isis_lsp_header {
        void pdu_length(unsigned short n) { encode(0, 1, n); }
        void remaining_lifetime(unsigned short n) { encode(2, 3, n); }
        void lsp_id(unsigned char *n) { std::memcpy(&rep_[4], n, sizeof(START_LSP_ID));}
-       void sequnce_num(unsigned char *n) { std::memcpy(&rep_[12], n, 4);}
+       void sequence_num(unsigned char *n) { std::memcpy(&rep_[12], n, 4);}
        void checksum(unsigned short n) { encode(16, 17, n); }
        void type_block(unsigned char n) { rep_[18] = n; }   
 
@@ -771,6 +771,7 @@ class tlv_137 {
          void tlv_hostname(unsigned char * n, std::size_t l) { std::memcpy(rep_+2,n,l); }
 
          unsigned char tlv_length() const { return rep_[1]; };
+          unsigned char* data() { return &rep_[0]; };
 
          friend std::istream& operator>>(std::istream& is, tlv_137& header)
                     { return is.read(reinterpret_cast<char*>(header.rep_), header.rep_[1] + 2); }
