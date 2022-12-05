@@ -20,8 +20,8 @@ struct ISIS_PKT : PKT {};
 
 class ISIS_ADJ : public tinyfsm::Fsm<ISIS_ADJ> {
     public:
-	virtual void react(const ISIS_PKT&){};
-	virtual void react(const TIMEOUT&){};
+	virtual void react(ISIS_PKT&){};
+	virtual void react(TIMEOUT&){};
 	virtual void entry(){};
 	virtual void exit(){};
 };
@@ -30,30 +30,24 @@ class Down : public ISIS_ADJ {
 	void entry() override {
 		std::cout << "ISIS Adj is : Down" << std::endl;
 	};
-	void react(const ISIS_PKT& e) override;
+	void react(ISIS_PKT& e) override;
 };
 
 class Init : public ISIS_ADJ {
 	void entry() override {
 		std::cout << "ISIS Adj is : Init" << std::endl;
 	};
-	void react(const ISIS_PKT& e) override;
+	void react(ISIS_PKT& e) override;
 };
 
 class Up : public ISIS_ADJ {
 	void entry() override { std::cout << "ISIS Adj is : Up" << std::endl; };
-	void react(const ISIS_PKT& e) override;
-	void react(const TIMEOUT& e) override;
+	void react(ISIS_PKT& e) override;
+	void react(TIMEOUT& e) override;
 };
 
-void Down::react(const ISIS_PKT& e) {
-	/* have to copy here as FSM provides const buffer and we want to use
-	 * istream */
-	boost::asio::streambuf data_local_;
-	std::size_t bytes_copied =
-	    buffer_copy(data_local_.prepare(e.data_.size()), e.data_.data());
-	data_local_.commit(bytes_copied);
-	std::istream packet_r(&data_local_);
+void Down::react(ISIS_PKT& e) {
+        std::istream packet_r(&e.data_);
 	eth_header hdr_0_r;
 	isis_header hdr_1_r;
 	isis_hello_header hdr_2_r;
@@ -97,12 +91,8 @@ void Down::react(const ISIS_PKT& e) {
 	}
 }
 
-void Init::react(const ISIS_PKT& e) {
-	boost::asio::streambuf data_local_;
-	std::size_t bytes_copied =
-	    buffer_copy(data_local_.prepare(e.data_.size()), e.data_.data());
-	data_local_.commit(bytes_copied);
-	std::istream packet_r(&data_local_);
+void Init::react(ISIS_PKT& e) {
+        std::istream packet_r(&e.data_);
 	eth_header hdr_0_r;
 	isis_header hdr_1_r;
 	isis_hello_header hdr_2_r;
@@ -150,12 +140,8 @@ void Init::react(const ISIS_PKT& e) {
 	}
 }
 
-void Up::react(const ISIS_PKT& e) {
-	boost::asio::streambuf data_local_;
-	std::size_t bytes_copied =
-	    buffer_copy(data_local_.prepare(e.data_.size()), e.data_.data());
-	data_local_.commit(bytes_copied);
-	std::istream packet_r(&data_local_);
+void Up::react(ISIS_PKT& e) {
+        std::istream packet_r(&e.data_);
 	eth_header hdr_0_r;
 	isis_header hdr_1_r;
 	isis_hello_header hdr_2_r;
@@ -222,7 +208,7 @@ void Up::react(const ISIS_PKT& e) {
 	}
 }
 
-void Up::react(const TIMEOUT& e) {
+void Up::react(TIMEOUT& e) {
 	(void)e;
 	std::cout << "Hold-time expired. Going Down." << std::endl;
 	transit<Down>();
@@ -232,7 +218,7 @@ using fsm_list = tinyfsm::FsmList<ISIS_ADJ>;
 
 /* dispatch event to "ISIS_ADJ" */
 template <typename E>
-void send_event(const E& event) {
+void send_event(E& event) {
 	fsm_list::template dispatch<E>(event);
 }
 

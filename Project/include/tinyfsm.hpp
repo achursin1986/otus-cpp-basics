@@ -122,7 +122,7 @@ namespace tinyfsm
     }
 
     template<typename E>
-    static void dispatch(E const & event) {
+    static void dispatch(E & event) {
       current_state_ptr->react(event);
     }
 
@@ -198,7 +198,7 @@ namespace tinyfsm
     }
 
     template<typename E>
-    static void dispatch(E const & event) {
+    static void dispatch(E & event) {
       fsmtype::template dispatch<E>(event);
       FsmList<FF...>::template dispatch<E>(event);
     }
