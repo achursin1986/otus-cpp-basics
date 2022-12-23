@@ -209,9 +209,9 @@ void Up::react(ISIS_PKT& e) {
 }
 
 void Up::react(TIMEOUT& e) {
-	(void)e;
 	std::cout << "Hold-time expired. Going Down." << std::endl;
 	transit<Down>();
+        (void)e;
 }
 
 using fsm_list = tinyfsm::FsmList<ISIS_ADJ>;

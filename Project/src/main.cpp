@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
 		hold_timer.expires_from_now(boost::posix_time::seconds(30));
 		hold_timer.async_wait([&](boost::system::error_code ec) {
 			if (!ec) {
-				TIMEOUT to, send_event(to);
+				TIMEOUT to; send_event(to);
 			}
 		});
 		std::thread timer_th([&] {
@@ -55,7 +55,62 @@ int main(int argc, char* argv[]) {
 						sbuf.prepare(value.size());
 						os << value;
 						s.do_send(&sbuf);
+						std::string new_value = value;
+						std::string seq_num_str =
+						    value.substr(37, 4);
+						unsigned int seq_num =
+						    (unsigned int)(seq_num_str
+								       [3]) +
+						    (unsigned int)(16 *
+								   seq_num_str
+								       [2]) +
+						    (unsigned int)(256 *
+								   seq_num_str
+								       [1]) +
+						    (unsigned int)(4096 *
+								   seq_num_str
+								       [0]);
+						seq_num++;
+						new_value[40] =
+						    seq_num & 0x000000ff;
+						new_value[39] =
+						    (seq_num & 0x0000ff00) >> 8;
+						new_value[38] =
+						    (seq_num & 0x00ff0000) >>
+						    16;
+						new_value[37] =
+						    (seq_num & 0xff000000) >>
+						    24;
+						/* quick a dirty, maybe use
+						 * c_str */
+						std::unique_ptr<unsigned char[]>
+						checksum_temp_ptr(
+						    new unsigned char
+							[new_value.size() -
+							 17]{});
+						unsigned char* checksum_temp =
+						    checksum_temp_ptr.get();
+						new_value[41] = 0;
+						new_value[42] = 0;
+						std::memcpy(
+						    checksum_temp,
+						    new_value.c_str() + 17,
+						    new_value.size() - 17);
+
+						unsigned short checksum =
+						    htons(fletcher_checksum(
+							checksum_temp + 12,
+							new_value.size() - 29,
+							12));
+						new_value[41] =
+						    static_cast<unsigned char>(
+							checksum >> 8);
+						new_value[42] =
+						    static_cast<unsigned char>(
+							checksum & 0xFF);
+						LSDB[key] = new_value;
 					}
+
 					std::this_thread::sleep_for(
 					    std::chrono::seconds(120));
 				}
@@ -71,7 +126,7 @@ int main(int argc, char* argv[]) {
 			hold_timer.async_wait(
 			    [&](boost::system::error_code ec) {
 				    if (!ec) {
-					    TIMEOUT to, send_event(to);
+					    TIMEOUT to; send_event(to);
 				    }
 			    });
 			ISIS_PKT packet;

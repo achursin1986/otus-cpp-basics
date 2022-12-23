@@ -27,7 +27,7 @@
                 ],
                 "sequence-number" : [
                 {
-                    "data" : "0xaa"
+                    "data" : "0x5"
                 }
                 ],
                 "checksum" : [
@@ -373,7 +373,7 @@
                         ]
                     }
                     ],
-                    "reachability-tlv" : [
+                    "1" : [
                     {
                         "attributes" : {"heading" : "IP prefix:"},
                         "address-prefix" : [
@@ -500,7 +500,7 @@
                         ]
                     }
                     ],
-                    "reachability-tlv" : [
+                    "2" : [
                     {
                         "attributes" : {"heading" : "IS neighbor:"},
                         "address-prefix" : [
@@ -520,7 +520,7 @@
                         ]
                     }
                     ],
-                    "ext-reachability-tlv" : [
+                    "1" : [
                     {
                         "isis-tlv-type" : [
                         {
@@ -534,7 +534,7 @@
                         ]
                     }
                     ],
-                    "reachability-tlv" : [
+                    "3" : [
                     {
                         "attributes" : {"heading" : "IS extended neighbor:"},
                         "address-prefix" : [
@@ -843,7 +843,7 @@
                         ]
                     }
                     ],
-                    "reachability-tlv" : [
+                    "4" : [
                     {
                         "attributes" : {"heading" : "IP prefix:"},
                         "address-prefix" : [
@@ -877,7 +877,7 @@
                         ]
                     }
                     ],
-                    "reachability-tlv" : [
+                    "5" : [
                     {
                         "attributes" : {"heading" : "IS neighbor:"},
                         "address-prefix" : [
