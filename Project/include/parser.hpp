@@ -7,6 +7,7 @@
 #include <iostream>
 #include <map>
 #include <stdexcept>
+#include <vector>
 
 #include "boost/algorithm/hex.hpp"
 #include "isis.hpp"
@@ -17,10 +18,11 @@ using json = nlohmann::json;
 void parse(std::map<std::string, std::string>& lsdb, std::string file_json) {
 	std::vector<std::string> keys;
 	std::ifstream f(file_json);
+	std::cout << "Loading JSON ..." << std::endl;
 	json raw = json::parse(f);
 	json data = raw["isis-database-information"][0]["isis-database"][1]
 		       ["isis-database-entry"];
-
+	std::cout << "done" << std::endl;
 	for (const auto& item : data) {
 		if (item.find("lsp-id") != item.end()) {
 			for (const auto& item2 : item["lsp-id"]) {
@@ -106,9 +108,6 @@ void parse(std::map<std::string, std::string>& lsdb, std::string file_json) {
 			pdu_length += hostname_str.size() + 2;
 			os_checksum << hostname;
 			os_tlvs << hostname;
-		} else {
-			std::cout << "hostname not found " << std::endl;
-			break;
 		}
 
 		/* buffer size tlv */
@@ -208,29 +207,18 @@ void parse(std::map<std::string, std::string>& lsdb, std::string file_json) {
 		if (!data[i]["isis-tlv"][0]["area-address-tlv"][0]["address"][0]
 			 ["data"]
 			     .is_null()) {
-			tlv_1 area;
+			// tlv_1 area;
+			tlv_1_ext area;
 			std::string area_str =
 			    data[i]["isis-tlv"][0]["area-address-tlv"][0]
 				["address"][0]["data"];
-
-			unsigned char area_array[4]{};
-			area_array[0] = 0x3;
-			size_t area_pos = 0;
-			std::string area_delimiter = ".";
-			std::string area_part_1{}, area_part_2{};
-			area_pos = area_str.find(area_delimiter);
-			area_part_1 = area_str.substr(0, area_pos);
-			area_part_2 = area_str.erase(
-			    0, area_pos + area_delimiter.length());
-			area_array[1] = static_cast<unsigned char>(
-			    std::stoi(area_part_1, 0, 16));
-			area_array[2] = static_cast<unsigned char>(
-			    std::stoi(area_part_2, 0, 16) >> 8);
-			area_array[3] = static_cast<unsigned char>(
-			    std::stoi(area_part_2, 0, 16) & 0xFF);
-			area.area(area_array);
-			eth_length += 6;
-			pdu_length += 6;
+			boost::erase_all(area_str, ".");
+			area.area(area_to_bytes(area_str).get(),
+				  area_str.size() / 2);
+			area.area_length(area_str.size() / 2);
+			area.tlv_length(1 + area_str.size() / 2);
+			eth_length += 3 + area_str.size() / 2;
+			pdu_length += 3 + area_str.size() / 2;
 			os_checksum << area;
 			os_tlvs << area;
 		}
@@ -286,7 +274,6 @@ void parse(std::map<std::string, std::string>& lsdb, std::string file_json) {
 			    data[i]["isis-tlv"][0]["ipv6address-tlv"][0]
 				["address"][0]["data"];
 
-			// unsigned char ipv6_addr_array[16]{};
 			IPv6Address ipv6_addr_array;
 			ipv6_addr_array.fromString(ipv6_addr_str.c_str());
 			ipv6_addr.ip_address(ipv6_addr_array.getAddr());
@@ -295,67 +282,113 @@ void parse(std::map<std::string, std::string>& lsdb, std::string file_json) {
 			os_checksum << ipv6_addr;
 			os_tlvs << ipv6_addr;
 		}
-		/* extended IS reachability  tlv 22 x n neighbors*/
-
+		/* extended IS reachability  tlv 22 (MT tlv 222) x n neighbors*/
 		/* iterating over tlvs 22 */
+
 		for (const auto& item : data[i]["isis-tlv"][0].items()) {
 			std::string key_str = std::string(item.key());
-			if (key_str.find("ext-reachability-tlv") !=
-			    std::string::npos) {
+			if (key_str.find("reachability-tlv") !=
+				std::string::npos &&
+			    key_str.find("ipv6") == std::string::npos) {
 				tlv_22 ext_reach;
+				tlv_222 mt_ext_reach;
 				unsigned int length{}, sub_length{};
-				boost::erase_all(key_str,
-						 "ext-reachability-tlv");
-				std::string rkey_str =
-				    "reachability-tlv" + key_str;
+
+				bool mt222 = false;
+				if (!data[i]["isis-tlv"][0][key_str][0]
+					 ["isis-topology-id"][0]["data"]
+					     .is_null()) {
+					std::string topology_id_str =
+					    std::string(
+						data[i]["isis-tlv"][0][key_str]
+						    [0]["isis-topology-id"][0]
+						    ["data"]);
+					if (topology_id_str.compare(
+						"IPV4 Unicast") == 0) {
+						mt_ext_reach.topology_id(0);
+					}
+					if (topology_id_str.compare(
+						"IPV6 Unicast") == 0) {
+						mt_ext_reach.topology_id(2);
+					}
+					if (topology_id_str.compare(
+						"IPV4 Multicast") == 0) {
+						mt_ext_reach.topology_id(3);
+					}
+					if (topology_id_str.compare(
+						"IPV6 Multicast") == 0) {
+						mt_ext_reach.topology_id(4);
+					}
+
+					mt222 = true;
+				}
+
 				/* get reachability tlv processed */
-				std::string neighbor_id = std::string(
-				    data[i]["isis-tlv"][0][rkey_str][0]
-					["address-prefix"][0]["data"]);
-				boost::erase_all(neighbor_id, ".");
-				unsigned char neighbor_id_temp[14]{0},
-				    neighbor_id_packed[7]{0};
-				std::memcpy(neighbor_id_temp,
-					    neighbor_id.c_str(),
-					    neighbor_id.size());
-				for (int j = 0; j < 14; ++j) {
-					neighbor_id_temp[j] -= 0x30;
+
+				if (!data[i]["isis-tlv"][0][key_str][0]
+					 ["address-prefix"][0]["data"]
+					     .is_null()) {
+					std::string neighbor_id = std::string(
+					    data[i]["isis-tlv"][0][key_str][0]
+						["address-prefix"][0]["data"]);
+					boost::erase_all(neighbor_id, ".");
+					unsigned char neighbor_id_temp[14]{0},
+					    neighbor_id_packed[7]{0};
+					std::memcpy(neighbor_id_temp,
+						    neighbor_id.c_str(),
+						    neighbor_id.size());
+					for (int j = 0; j < 14; ++j) {
+						neighbor_id_temp[j] -= 0x30;
+					}
+					for (int j = 0, k = 0; j < 7 && k < 14;
+					     ++j, k += 2) {
+						neighbor_id_packed[j] =
+						    16 * neighbor_id_temp[k] +
+						    neighbor_id_temp[k + 1];
+					}
+					ext_reach.neighbor_sysid(
+					    neighbor_id_packed);
+					if (mt222) {
+						mt_ext_reach.neighbor_sysid(
+						    neighbor_id_packed);
+					}
+					std::string metric_str = std::string(
+					    data[i]["isis-tlv"][0][key_str][0]
+						["metric"][0]["data"]);
+					unsigned int metric =
+					    std::stol(metric_str);
+					unsigned char metric_array[3]{};
+					metric_array[2] = (metric >> 0) & 0xFF;
+					metric_array[1] = (metric >> 8) & 0xFF;
+					metric_array[0] = (metric >> 16) & 0xFF;
+					ext_reach.metric(metric_array);
+					if (mt222) {
+						mt_ext_reach.metric(
+						    metric_array);
+					}
 				}
-				for (int j = 0, k = 0; j < 7 && k < 14;
-				     ++j, k += 2) {
-					neighbor_id_packed[j] =
-					    16 * neighbor_id_temp[k] +
-					    neighbor_id_temp[k + 1];
+
+				if (mt222) {
+					length += 15;
+					eth_length += 15;
+					pdu_length += 15;
+
+				} else {
+					length += 13;
+					eth_length += 13;
+					pdu_length += 13;
 				}
-				ext_reach.neighbor_sysid(neighbor_id_packed);
-				std::string metric_str =
-				    std::string(data[i]["isis-tlv"][0][rkey_str]
-						    [0]["metric"][0]["data"]);
-				unsigned int metric = std::stol(metric_str);
-				unsigned char metric_array[3]{};
-				metric_array[2] = (metric >> 0) & 0xFF;
-				metric_array[1] = (metric >> 8) & 0xFF;
-				metric_array[0] = (metric >> 16) & 0xFF;
-				ext_reach.metric(metric_array);
-				std::string subclv_length_str = std::string(
-				    data[i]["isis-tlv"][0][rkey_str][0]
-					["subtlv-length"][0]["data"]);
-				/*ext_reach.subclv_length(
-				    static_cast<unsigned char>(
-					std::stoi(subclv_length_str, 0, 16)));*/
-				length += 13;
-				eth_length += 13;
-				pdu_length += 13;
 
 				/* subTLVs */
+
 				subtlv22_c6 ip_interface_addr;
 				subtlv22_c8 neighbor_ip_addr;
 				subtlv22_c4 local_remote_ifindex;
 				for (const auto& subitem :
-				     data[i]["isis-tlv"][0][rkey_str][0]
+				     data[i]["isis-tlv"][0][key_str][0]
 					 ["isis-reachability-subtlv"]
 					     .items()) {
-					if (!data[i]["isis-tlv"][0][rkey_str][0]
+					if (!data[i]["isis-tlv"][0][key_str][0]
 						 ["isis-reachability-subtlv"]
 						 [std::stoi(subitem.key())]
 						 ["address"][0]["data"]
@@ -363,7 +396,7 @@ void parse(std::map<std::string, std::string>& lsdb, std::string file_json) {
 						std::string
 						    ip_interface_addr_str = data
 							[i]["isis-tlv"][0]
-							[rkey_str][0]
+							[key_str][0]
 							["isis-reachability-"
 							 "subtlv"][std::stoi(
 							    subitem.key())]
@@ -446,7 +479,7 @@ void parse(std::map<std::string, std::string>& lsdb, std::string file_json) {
 						eth_length += 6;
 						pdu_length += 6;
 					}
-					if (!data[i]["isis-tlv"][0][rkey_str][0]
+					if (!data[i]["isis-tlv"][0][key_str][0]
 						 ["isis-reachability-subtlv"]
 						 [std::stoi(subitem.key())]
 						 ["neighbor-prefix"][0]["data"]
@@ -454,7 +487,7 @@ void parse(std::map<std::string, std::string>& lsdb, std::string file_json) {
 						std::string
 						    neighbor_ip_addr_str = data
 							[i]["isis-tlv"][0]
-							[rkey_str][0]
+							[key_str][0]
 							["isis-reachability-"
 							 "subtlv"][std::stoi(
 							    subitem.key())]
@@ -536,12 +569,12 @@ void parse(std::map<std::string, std::string>& lsdb, std::string file_json) {
 						eth_length += 6;
 						pdu_length += 6;
 					}
-					if (!data[i]["isis-tlv"][0][rkey_str][0]
+					if (!data[i]["isis-tlv"][0][key_str][0]
 						 ["isis-reachability-subtlv"]
 						 [std::stoi(subitem.key())]
 						 ["local-ifindex"][0]["data"]
 						     .is_null() &&
-					    !data[i]["isis-tlv"][0][rkey_str][0]
+					    !data[i]["isis-tlv"][0][key_str][0]
 						 ["isis-reachability-subtlv"]
 						 [std::stoi(subitem.key())]
 						 ["remote-ifindex"][0]["data"]
@@ -549,7 +582,7 @@ void parse(std::map<std::string, std::string>& lsdb, std::string file_json) {
 						std::string local_ifindex_str =
 						    std::string(
 							data[i]["isis-tlv"][0]
-							    [rkey_str][0]
+							    [key_str][0]
 							    ["isis-"
 							     "reachability-"
 							     "subtlv"]
@@ -560,7 +593,7 @@ void parse(std::map<std::string, std::string>& lsdb, std::string file_json) {
 						std::string remote_ifindex_str =
 						    std::string(
 							data[i]["isis-tlv"][0]
-							    [rkey_str][0]
+							    [key_str][0]
 							    ["isis-"
 							     "reachability-"
 							     "subtlv"]
@@ -613,163 +646,407 @@ void parse(std::map<std::string, std::string>& lsdb, std::string file_json) {
 						pdu_length += 10;
 					}
 				}
-				ext_reach.subclv_length(sub_length);
-				ext_reach.tlv_length(length - 2);
-				os_checksum << ext_reach << ip_interface_addr
-					    << neighbor_ip_addr
-					    << local_remote_ifindex;
-				os_tlvs << ext_reach << ip_interface_addr
-					<< neighbor_ip_addr
-					<< local_remote_ifindex;
+				// bug load structs which are not needed if
+				// subclv is 0
+				if (mt222) {
+					mt_ext_reach.subclv_length(sub_length);
+					mt_ext_reach.tlv_length(length - 2);
+					os_checksum << mt_ext_reach;
+					os_tlvs << mt_ext_reach;
+					if (sub_length) {
+						os_checksum
+						    << ip_interface_addr
+						    << neighbor_ip_addr
+						    << local_remote_ifindex;
+						os_tlvs << ip_interface_addr
+							<< neighbor_ip_addr
+							<< local_remote_ifindex;
+					}
+				} else {
+					ext_reach.subclv_length(sub_length);
+					ext_reach.tlv_length(length - 2);
+					os_checksum << ext_reach;
+					os_tlvs << ext_reach;
+					if (sub_length) {
+						os_checksum
+						    << ip_interface_addr
+						    << neighbor_ip_addr
+						    << local_remote_ifindex;
+						os_tlvs << ip_interface_addr
+							<< neighbor_ip_addr
+							<< local_remote_ifindex;
+					}
+				}
 				// TE
-				/*if (!data[i]["isis-tlv"][0][rkey_str][0]
-					 ["isis-reachability-subtlv"][4]
-					 ["max-bandwidth"][0]["data"]
-					     .is_null()) {
-					os_checksum << max_bandwidth
-						    << max_reserve_bandwidth
-					    << unreserved_bandwidth
-					    << admin_groups;
-					os_tlvs << max_bandwidth
-						<< max_reserve_bandwidth
-					    << unreserved_bandwidth
-					    << admin_groups;  */
-			}
+			}  // else handle if fail above
 
 			// SR
 		}
-
-		/* Ext IP reachability tlv 135 */
-		if (!data[i]["isis-tlv"][0]["ip-prefix-tlv"][0]
-			 ["address-prefix"][0]["data"]
-			     .is_null()) {
-			tlv_135 ext_ip_reach;
-			unsigned int length = 2;
-			eth_length += 2;
-			pdu_length += 2;
-			boost::asio::streambuf tlv135_temp;
-			std::ostream tlv135_stream(&tlv135_temp);
-
-			for (const auto& subitem :
-			     data[i]["isis-tlv"][0]["ip-prefix-tlv"].items()) {
-				if (!data[i]["isis-tlv"][0]["ip-prefix-tlv"]
-					 [std::stoi(subitem.key())]
+		/* Ext IP reachability tlv 135 (MT tlv 235) */
+		for (const auto& item : data[i]["isis-tlv"][0].items()) {
+			std::string key_str = std::string(item.key());
+			if (key_str.find("ip-prefix-tlv") !=
+			    std::string::npos) {
+				if (!data[i]["isis-tlv"][0][key_str][0]
 					 ["address-prefix"][0]["data"]
 					     .is_null()) {
-					tlv135_ipreach ipreach;
-					length += 9;
-					eth_length += 9;
-					pdu_length += 9;
-					std::string ip_metric_str = std::string(
-					    data[i]["isis-tlv"][0]
-						["ip-prefix-tlv"]
-						[std::stoi(subitem.key())]
-						["metric"][0]["data"]);
-					unsigned int ip_metric =
-					    std::stol(ip_metric_str);
-					unsigned char ip_metric_array[4]{};
-					ip_metric_array[3] =
-					    (ip_metric >> 0) & 0xFF;
-					ip_metric_array[2] =
-					    (ip_metric >> 8) & 0xFF;
-					ip_metric_array[1] =
-					    (ip_metric >> 16) & 0xFF;
-					ip_metric_array[0] =
-					    (ip_metric >> 24) & 0xFF;
-					ipreach.metric(ip_metric_array);
-					std::string ip_prefix_delimiter = "/",
-						    ip_addr_delimiter = ".";
-					size_t ip_prefix_pos = 0;
-					std::string ip_prefix_withlength =
-					    std::string(
-						data[i]["isis-tlv"][0]
-						    ["ip-prefix-tlv"]
-						    [std::stoi(subitem.key())]
-						    ["address-prefix"][0]
-						    ["data"]);
-					ip_prefix_pos =
-					    ip_prefix_withlength.find(
-						ip_prefix_delimiter);
-					std::string ip_prefix_str =
-					    ip_prefix_withlength.substr(
-						0, ip_prefix_pos);
-					std::string ip_prefixl_str =
-					    ip_prefix_withlength.substr(
-						ip_prefix_pos + 1,
-						ip_prefix_withlength.length());
+					tlv_135 ext_ip_reach;
+					tlv_235 mt_ext_ip_reach;
+					bool mt235 = false;
+					if (!data[i]["isis-tlv"][0][key_str][0]
+						 ["isis-topology-id"][0]["data"]
+						     .is_null()) {
+						std::string topology_id_str =
+						    std::string(
+							data[i]["isis-tlv"][0]
+							    [key_str][0]
+							    ["isis-topology-id"]
+							    [0]["data"]);
+						if (topology_id_str.compare(
+							"IPV4 Unicast") == 0) {
+							mt_ext_ip_reach
+							    .topology_id(0);
+						}
+						if (topology_id_str.compare(
+							"IPV6 Unicast") == 0) {
+							mt_ext_ip_reach
+							    .topology_id(2);
+						}
+						if (topology_id_str.compare(
+							"IPV4 Multicast") ==
+						    0) {
+							mt_ext_ip_reach
+							    .topology_id(3);
+						}
+						if (topology_id_str.compare(
+							"IPV6 Multicast") ==
+						    0) {
+							mt_ext_ip_reach
+							    .topology_id(4);
+						}
 
-					std::string ip_prefix_part_1{},
-					    ip_prefix_part_2{},
-					    ip_prefix_part_3{},
-					    ip_prefix_part_4{};
-
-					ip_prefix_pos = ip_prefix_str.find(
-					    ip_addr_delimiter);
-					ip_prefix_part_1 = ip_prefix_str.substr(
-					    0, ip_prefix_pos);
-					ip_prefix_str.erase(
-					    0, ip_prefix_pos +
-						   ip_addr_delimiter.length());
-					ip_prefix_pos = ip_prefix_str.find(
-					    ip_addr_delimiter);
-					ip_prefix_part_2 = ip_prefix_str.substr(
-					    0, ip_prefix_pos);
-					ip_prefix_str.erase(
-					    0, ip_prefix_pos +
-						   ip_addr_delimiter.length());
-					ip_prefix_pos = ip_prefix_str.find(
-					    ip_addr_delimiter);
-					ip_prefix_part_3 = ip_prefix_str.substr(
-					    0, ip_prefix_pos);
-					ip_prefix_str.erase(
-					    0, ip_prefix_pos +
-						   ip_addr_delimiter.length());
-					ip_prefix_part_4 = ip_prefix_str;
-                                        unsigned char ip_prefix_array[4]{};
-					ip_prefix_array[0] =
-					    static_cast<unsigned char>(
-						std::stoi(ip_prefix_part_1, 0,
-							  10));
-					ip_prefix_array[1] =
-					    static_cast<unsigned char>(
-						std::stoi(ip_prefix_part_2, 0,
-							  10));
-					ip_prefix_array[2] =
-					    static_cast<unsigned char>(
-						std::stoi(ip_prefix_part_3, 0,
-							  10));
-					ip_prefix_array[3] =
-					    static_cast<unsigned char>(
-						std::stoi(ip_prefix_part_4, 0,
-							  10));
-					ipreach.ipv4_prefix(ip_prefix_array);
-
-					unsigned char flags{};
-                                        flags = static_cast<unsigned char>(std::stoi(ip_prefixl_str));
-
-					if (std::string(
-						data[i]["isis-tlv"][0]
-						    ["ip-prefix-tlv"]
-						    [std::stoi(subitem.key())]
-						    ["prefix-status"][0]
-						    ["data"]) == "down") {
-						flags |= 1 << 7;
+						mt235 = true;
 					}
-					ipreach.flags(flags);
+					unsigned int length = 2;
+					if (mt235) {
+						eth_length += 4;
+						pdu_length += 4;
+						length += 2;
 
-					tlv135_stream << ipreach;
+					} else {
+						eth_length += 2;
+						pdu_length += 2;
+					}
+					boost::asio::streambuf tlv135_temp;
+					std::ostream tlv135_stream(
+					    &tlv135_temp);
+					for (const auto& subitem :
+					     data[i]["isis-tlv"][0][key_str]
+						 .items()) {
+						if (!data[i]["isis-tlv"][0]
+							 [key_str][std::stoi(
+							     subitem.key())]
+							 ["address-prefix"][0]
+							 ["data"]
+							     .is_null()) {
+							tlv135_ipreach ipreach;
+							length += 9;
+							eth_length += 9;
+							pdu_length += 9;
+
+							std::string ip_metric_str =
+							    std::string(
+								data[i]
+								    ["isis-tlv"]
+								    [0][key_str]
+								    [std::stoi(
+									subitem
+									    .key())]
+								    ["metric"]
+								    [0]
+								    ["data"]);
+							unsigned int ip_metric =
+							    std::stol(
+								ip_metric_str);
+							unsigned char
+							    ip_metric_array
+								[4]{};
+							ip_metric_array[3] =
+							    (ip_metric >> 0) &
+							    0xFF;
+							ip_metric_array[2] =
+							    (ip_metric >> 8) &
+							    0xFF;
+							ip_metric_array[1] =
+							    (ip_metric >> 16) &
+							    0xFF;
+							ip_metric_array[0] =
+							    (ip_metric >> 24) &
+							    0xFF;
+							ipreach.metric(
+							    ip_metric_array);
+
+							std::string
+							    ip_prefix_delimiter =
+								"/",
+							    ip_addr_delimiter =
+								".";
+							size_t ip_prefix_pos =
+							    0;
+							std::string ip_prefix_withlength =
+							    std::string(
+								data[i]
+								    ["isis-tlv"]
+								    [0][key_str]
+								    [std::stoi(
+									subitem
+									    .key())]
+								    ["address-"
+								     "prefix"]
+								    [0]
+								    ["data"]);
+							ip_prefix_pos =
+							    ip_prefix_withlength.find(
+								ip_prefix_delimiter);
+							std::string ip_prefix_str =
+							    ip_prefix_withlength
+								.substr(
+								    0,
+								    ip_prefix_pos);
+							std::string ip_prefixl_str =
+							    ip_prefix_withlength
+								.substr(
+								    ip_prefix_pos +
+									1,
+								    ip_prefix_withlength
+									.length());
+
+							std::string
+							    ip_prefix_part_1{},
+							    ip_prefix_part_2{},
+							    ip_prefix_part_3{},
+							    ip_prefix_part_4{};
+
+							ip_prefix_pos =
+							    ip_prefix_str.find(
+								ip_addr_delimiter);
+							ip_prefix_part_1 =
+							    ip_prefix_str.substr(
+								0,
+								ip_prefix_pos);
+							ip_prefix_str.erase(
+							    0,
+							    ip_prefix_pos +
+								ip_addr_delimiter
+								    .length());
+							ip_prefix_pos =
+							    ip_prefix_str.find(
+								ip_addr_delimiter);
+							ip_prefix_part_2 =
+							    ip_prefix_str.substr(
+								0,
+								ip_prefix_pos);
+							ip_prefix_str.erase(
+							    0,
+							    ip_prefix_pos +
+								ip_addr_delimiter
+								    .length());
+							ip_prefix_pos =
+							    ip_prefix_str.find(
+								ip_addr_delimiter);
+							ip_prefix_part_3 =
+							    ip_prefix_str.substr(
+								0,
+								ip_prefix_pos);
+							ip_prefix_str.erase(
+							    0,
+							    ip_prefix_pos +
+								ip_addr_delimiter
+								    .length());
+							ip_prefix_part_4 =
+							    ip_prefix_str;
+							unsigned char
+							    ip_prefix_array
+								[4]{};
+							ip_prefix_array[0] =
+							    static_cast<
+								unsigned char>(
+								std::stoi(
+								    ip_prefix_part_1,
+								    0, 10));
+							ip_prefix_array[1] =
+							    static_cast<
+								unsigned char>(
+								std::stoi(
+								    ip_prefix_part_2,
+								    0, 10));
+							ip_prefix_array[2] =
+							    static_cast<
+								unsigned char>(
+								std::stoi(
+								    ip_prefix_part_3,
+								    0, 10));
+							ip_prefix_array[3] =
+							    static_cast<
+								unsigned char>(
+								std::stoi(
+								    ip_prefix_part_4,
+								    0, 10));
+							ipreach.ipv4_prefix(
+							    ip_prefix_array);
+
+							unsigned char flags{};
+							flags = static_cast<
+							    unsigned char>(
+							    std::stoi(
+								ip_prefixl_str));
+
+							if (std::string(
+								data[i]
+								    ["isis-tlv"]
+								    [0][key_str]
+								    [std::stoi(
+									subitem
+									    .key())]
+								    ["prefix-"
+								     "status"]
+								    [0]
+								    ["data"]) ==
+							    "down") {
+								flags |= 1 << 7;
+							}
+							ipreach.flags(flags);
+
+							tlv135_stream
+							    << ipreach;
+						}
+					}
+
+					std::string tlv135_temp_str(
+					    boost::asio::buffers_begin(
+						tlv135_temp.data()),
+					    boost::asio::buffers_begin(
+						tlv135_temp.data()) +
+						tlv135_temp.size());
+
+					if (mt235) {
+						mt_ext_ip_reach.tlv_length(
+						    length - 2);
+						os_checksum << mt_ext_ip_reach
+							    << tlv135_temp_str;
+						os_tlvs << mt_ext_ip_reach
+							<< tlv135_temp_str;
+
+					} else {
+						ext_ip_reach.tlv_length(length -
+									2);
+						os_checksum << ext_ip_reach
+							    << tlv135_temp_str;
+						os_tlvs << ext_ip_reach
+							<< tlv135_temp_str;
+					}
 				}
 			}
-
-			std::string tlv135_temp_str(
-			    boost::asio::buffers_begin(tlv135_temp.data()),
-			    boost::asio::buffers_begin(tlv135_temp.data()) +
-				tlv135_temp.size());
-			ext_ip_reach.tlv_length(length - 2);
-			os_checksum << ext_ip_reach << tlv135_temp_str;
-			os_tlvs << ext_ip_reach << tlv135_temp_str;
 		}
+		/* router capability tlv 242 */
+		if (!data[i]["isis-tlv"][0]["rtr-capability-tlv"][0]
+			 ["router-id"][0]["data"]
+			     .is_null()) {
+			tlv_242 rtr_capability;
+			eth_length += 7;
+			pdu_length += 7;
 
+			std::string rtr_id_str = std::string(
+			    data[i]["isis-tlv"][0]["rtr-capability-tlv"][0]
+				["router-id"][0]["data"]);
+			rtr_capability.router_id(ip_to_array(rtr_id_str).get());
+			std::string rtr_flags_str = std::string(
+			    data[i]["isis-tlv"][0]["rtr-capability-tlv"][0]
+				["rtr-cap-flags"][0]["data"]);
+			rtr_flags_str.erase(0, 2);
+			rtr_capability.flags(static_cast<unsigned char>(
+			    std::stoi(rtr_flags_str, 0, 16)));
+			os_checksum << rtr_capability;
+			os_tlvs << rtr_capability;
+		}
+		if (!data[i]["isis-prefix"][0]["isis-topology-id"][0]["data"]
+			 .is_null()) {
+			std::cout << "Multi-topology:" << std::endl;
+			std::vector<unsigned int> status(4, 0);
+			for (const auto& subitem :
+			     data[i]["isis-prefix"].items()) {
+				if (!data[i]["isis-prefix"]
+					 [std::stoi(subitem.key())]
+					 ["isis-topology-id"][0]["data"]
+					     .is_null()) {
+					std::string topology_string =
+					    data[i]["isis-prefix"]
+						[std::stoi(subitem.key())]
+						["isis-topology-id"][0]["data"];
+					if (!status[0] &&
+					    topology_string.compare(
+						"IPV4 Unicast") == 0) {
+						status[0] = 1;
+					}
+					if (!status[1] &&
+					    topology_string.compare(
+						"IPV6 Unicast") == 0) {
+						status[1] = 1;
+					}
+					if (!status[2] &&
+					    topology_string.compare(
+						"IPV4 Multicast") == 0) {
+						status[2] = 1;
+					}
+					if (!status[3] &&
+					    topology_string.compare(
+						"IPV6 Multicast") == 0) {
+						status[3] = 1;
+					}
+				}
+			}
+			unsigned int mt_length{};
+			boost::asio::streambuf mt_temp;
+			std::ostream mt_stream(&mt_temp);
+			if (status[0]) {
+				std::cout << "IPv4 unicast" << std::endl;
+				mt_length++;
+				tlv_229_topology ipv4_unicast;
+				ipv4_unicast.topology(0);
+				mt_stream << ipv4_unicast;
+			};
+			if (status[1]) {
+				std::cout << "IPv6 unicast" << std::endl;
+				mt_length++;
+				tlv_229_topology ipv6_unicast;
+				ipv6_unicast.topology(2);
+				mt_stream << ipv6_unicast;
+			};
+			if (status[2]) {
+				std::cout << "IPv4 multicast" << std::endl;
+				mt_length++;
+				tlv_229_topology ipv4_multicast;
+				ipv4_multicast.topology(3);
+				mt_stream << ipv4_multicast;
+			};
+			if (status[3]) {
+				std::cout << "IPv6 multicast" << std::endl;
+				mt_length++;
+				tlv_229_topology ipv6_multicast;
+				ipv6_multicast.topology(4);
+				mt_stream << ipv6_multicast;
+			};
+			std::string mt_str(
+			    boost::asio::buffers_begin(mt_temp.data()),
+			    boost::asio::buffers_begin(mt_temp.data()) +
+				mt_temp.size());
+			tlv_229 multitopology;
+			multitopology.tlv_length(2 * mt_length);
+			os_checksum << multitopology << mt_str;
+			os_tlvs << multitopology << mt_str;
+			eth_length += 2 * mt_length + 2;
+			pdu_length += 2 * mt_length + 2;
+		}
 		// more TLVs go here
 
 		eth.length(eth_length);

@@ -1,3 +1,5 @@
+#include <unistd.h>
+
 #include <boost/asio.hpp>
 #include <cctype>
 #include <chrono>
@@ -31,7 +33,8 @@ int main(int argc, char* argv[]) {
 		hold_timer.expires_from_now(boost::posix_time::seconds(30));
 		hold_timer.async_wait([&](boost::system::error_code ec) {
 			if (!ec) {
-				TIMEOUT to; send_event(to);
+				TIMEOUT to;
+				send_event(to);
 			}
 		});
 		std::thread timer_th([&] {
@@ -47,8 +50,10 @@ int main(int argc, char* argv[]) {
 		std::thread flooder_th([&] {
 			while (1) {
 				if (ISIS_ADJ::is_in_state<Up>()) {
-					std::cout << "flooding LSPs >> DUT"
-						  << std::endl;
+					std::cout << std::endl
+						  << "flooding LSPs to DUT";
+					/*<< std::endl;*/
+
 					for (auto const& [key, value] : LSDB) {
 						boost::asio::streambuf sbuf;
 						std::iostream os(&sbuf);
@@ -81,8 +86,6 @@ int main(int argc, char* argv[]) {
 						new_value[37] =
 						    (seq_num & 0xff000000) >>
 						    24;
-						/* quick a dirty, maybe use
-						 * c_str */
 						std::unique_ptr<unsigned char[]>
 						checksum_temp_ptr(
 						    new unsigned char
@@ -110,9 +113,27 @@ int main(int argc, char* argv[]) {
 							checksum & 0xFF);
 						LSDB[key] = new_value;
 					}
-
+					/*std::cout << "sleeping" <<
+					 * std::endl;*/
+					std::cout << "|";
+					for (unsigned int i = 0; i < 3; i++) {
+						std::cout << "\b/"
+							  << std::flush;
+						sleep(0.5);
+						std::cout << "\b-"
+							  << std::flush;
+						sleep(0.5);
+						std::cout << "\b\\"
+							  << std::flush;
+						sleep(0.5);
+						std::cout << "\b|"
+							  << std::flush;
+						sleep(0.5);
+					}
+                                        std::cout << "\b ";
+					std::cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b" << std::flush;
 					std::this_thread::sleep_for(
-					    std::chrono::seconds(120));
+					    std::chrono::seconds(1000));
 				}
 			}
 		});
@@ -126,7 +147,8 @@ int main(int argc, char* argv[]) {
 			hold_timer.async_wait(
 			    [&](boost::system::error_code ec) {
 				    if (!ec) {
-					    TIMEOUT to; send_event(to);
+					    TIMEOUT to;
+					    send_event(to);
 				    }
 			    });
 			ISIS_PKT packet;

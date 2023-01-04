@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <boost/algorithm/string.hpp>
 #include <cctype>
 #include <iomanip>
 #include <iostream>
@@ -156,7 +157,7 @@ class IPv6Address {
 	IPv6Address();
 
 	bool fromString(const char* addrstr);
-        unsigned char* getAddr() { return &_address[0]; }
+	unsigned char* getAddr() { return &_address[0]; }
 
 	void print();
 
@@ -231,5 +232,64 @@ bool IPv6Address::fromString(const char* addrstr) {
 
 	// Success
 	return 1;
+}
+
+std::unique_ptr<unsigned char[]> num_to_array(std::string& num_str,
+					      unsigned int size) {
+	unsigned int num{};
+	if (!num_str.find("0x")) {
+		num_str.erase(0, 2);
+		num = std::stol(num_str, 0, 16);
+	} else {
+		num = std::stol(num_str);
+	}
+
+	std::unique_ptr<unsigned char[]> num_ptr(new unsigned char[size]{});
+	unsigned char* num_array = num_ptr.get();
+	for (unsigned int i = 0; i < size; i++) {
+		num_array[i] = (num >> (size - i - 1) * 8) & 0xFF;
+	}
+	return num_ptr;
+}
+
+std::unique_ptr<unsigned char[]> ip_to_array(std::string& ip_str) {
+	std::string ip_addr_delimiter = ".";
+	unsigned int pos{};
+	std::unique_ptr<unsigned char[]> ip_ptr(new unsigned char[4]{});
+	unsigned char* ip_array = ip_ptr.get();
+
+	std::string ip_part_1{}, ip_part_2{}, ip_part_3{}, ip_part_4{};
+
+	pos = ip_str.find(ip_addr_delimiter);
+	ip_part_1 = ip_str.substr(0, pos);
+	ip_str.erase(0, pos + ip_addr_delimiter.length());
+	pos = ip_str.find(ip_addr_delimiter);
+	ip_part_2 = ip_str.substr(0, pos);
+	ip_str.erase(0, pos + ip_addr_delimiter.length());
+	pos = ip_str.find(ip_addr_delimiter);
+	ip_part_3 = ip_str.substr(0, pos);
+	ip_str.erase(0, pos + ip_addr_delimiter.length());
+	ip_part_4 = ip_str;
+
+	ip_array[0] = static_cast<unsigned char>(std::stoi(ip_part_1, 0, 10));
+	ip_array[1] = static_cast<unsigned char>(std::stoi(ip_part_2, 0, 10));
+	ip_array[2] = static_cast<unsigned char>(std::stoi(ip_part_3, 0, 10));
+	ip_array[3] = static_cast<unsigned char>(std::stoi(ip_part_4, 0, 10));
+	return ip_ptr;
+}
+
+std::unique_ptr<unsigned char[]> area_to_bytes(std::string& area_str) {
+	std::string area_part1{},area_part2{};
+	std::unique_ptr<unsigned char[]> area_ptr(
+	    new unsigned char[(area_str.length() / 2)]{});
+	for (size_t i = 0, j = 0; i < area_str.length() && j < area_str.length();
+	     i += 2, j++) {
+		area_part1 = area_str[i];
+                area_part2 = area_str[i+1];
+		(area_ptr.get())[j] =
+		    static_cast<unsigned char>(16*std::stoi(area_part1, 0, 16) + std::stoi(area_part2, 0, 16));
+	}
+
+	return area_ptr;
 }
 

@@ -1,4 +1,5 @@
 #!/bin/bash
+# helper script for isis repl 
 
 if [ $# -le 1 ]
   then

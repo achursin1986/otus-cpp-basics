@@ -151,7 +151,7 @@ void Up::react(ISIS_PKT& e) {
 	/* CSNP and CSNP support from neighbor is not required for now, will be
 	 * added later */
 
-	if (hdr_1_r.pdu_type() == p2p_hello) {
+	if (hdr_1_r.pdu_type() == p2p_hello && payload_0_r.adjacency_state() == up) {
 #ifdef DEBUG
 		std::cout << "Got hello packet in Up" << std::endl;
 #endif
@@ -209,6 +209,7 @@ void Up::react(ISIS_PKT& e) {
 }
 
 void Up::react(TIMEOUT& e) {
+        std::cout << std::endl;
 	std::cout << "Hold-time expired. Going Down." << std::endl;
 	transit<Down>();
         (void)e;
