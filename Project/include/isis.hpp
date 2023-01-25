@@ -7,10 +7,17 @@
 static unsigned char ALL_ISS[6] = {0x09, 0x00, 0x2B, 0x00, 0x00, 0x05};
 static unsigned char OUR_MAC[6] = {0x00, 0x0c, 0x29, 0x6f, 0x14, 0xbf};
 static unsigned char OUR_IP_ADDRESS[4] = {0x0a, 0x64, 0x00, 0x01};
+static unsigned char DUT_IP_ADDRESS[4] = {0x0a, 0x64, 0x00, 0x00};
+static unsigned char FAKE_IP_ADDRESS2[4] = {0x0a, 0x64, 0x00, 0x02};
+static unsigned char FAKE_IP_ADDRESS3[4] = {0x0a, 0x64, 0x00, 0x03};
+static unsigned char FAKE_METRIC[3] = {0x00, 0x00, 0x10};
+static unsigned char FAKE_IP_METRIC[4] = {0x00, 0x00, 0x00, 0x10};
+static unsigned char FAKE_IF_INDEX[4] = {0x00, 0x00, 0x01, 0x00};
+static unsigned char FAKE_IF_INDEX2[4] = {0x00, 0x00, 0x02, 0x00};
 static unsigned char OUR_IPV6_ADDRESS[16] = {};
 static unsigned char SYS_ID[6] = {0x00, 0x01, 0x00, 0x00, 0x00, 0x01};
+static unsigned char DUT_SYS_ID[7] = {0x00, 0x03, 0x00, 0x03, 0x00, 0x03, 0x00};
 static unsigned char AREA[4] = {0x03, 0x49, 0x00, 0x01};
-// static unsigned char CIRCUIT_ID = {0x00};
 static unsigned char EXTENDED_CIRCUIT_ID[4] = {0x00, 0x00, 0x00, 0x01};
 static unsigned char SOURCE_ID[7] = {0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00};
 static unsigned char START_LSP_ID[8] = {0x00, 0x00, 0x00, 0x00,
@@ -22,6 +29,7 @@ static unsigned char OUR_LSP_ID[8] = {0x00, 0x01, 0x00, 0x00,
 static unsigned char OUR_LSP_SEQ[4] = {0x00, 0x00, 0x00, 0x01};
 
 static unsigned char OUR_LSP_LT[2] = {0x04, 0x4c};
+static unsigned char OUR_HOSTNAME[11] = {0x69, 0x73, 0x69, 0x73, 0x2d, 0x6d, 0x6f, 0x63, 0x6b, 0x65, 0x72};
 
 enum level { l1 = 0x1, l2 = 0x2, l12 = 0x3 };
 
@@ -1023,6 +1031,7 @@ class tlv_135 {
 /* substructs and subtlvs */
 /* substruct Ext. IP rechability */
 
+
 class tlv135_ipreach {
     public:
 	tlv135_ipreach() { std::fill(rep_, rep_ + sizeof(rep_), 0); }
@@ -1030,15 +1039,23 @@ class tlv135_ipreach {
 	void metric(unsigned char* n) { std::memcpy(rep_, n, 4); }
 	void flags(unsigned char n) { rep_[4] = n; }
 	void ipv4_prefix(unsigned char* n) { std::memcpy(rep_ + 5, n, 4); }
-
+        unsigned char flags() const { return rep_[4]; };
+        unsigned int prefix_bytes (const unsigned char flags) const { 
+                 if ( ((unsigned int)(flags & 0x3F) % 8) == 0 ) {
+                        return  (unsigned int)(flags & 0x3F) / 8;
+                 } else {
+                        return  (unsigned int)(flags & 0x3F) / 8 + 1;
+                 }
+        }
+        // on read here will be 5, need putback  
 	friend std::istream& operator>>(std::istream& is,
 					tlv135_ipreach& header) {
-		return is.read(reinterpret_cast<char*>(header.rep_), 9);
+		return is.read(reinterpret_cast<char*>(header.rep_), 5+header.prefix_bytes(header.flags()));
 	}
 
 	friend std::ostream& operator<<(std::ostream& os,
 					const tlv135_ipreach& header) {
-		return os.write(reinterpret_cast<const char*>(header.rep_), 9);
+		return os.write(reinterpret_cast<const char*>(header.rep_), 5+header.prefix_bytes(header.flags()));
 	}
 
     private:

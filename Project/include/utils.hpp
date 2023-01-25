@@ -153,7 +153,7 @@ uint16_t fletcher_checksum(uint8_t* buffer, const size_t len,
 }
 
 class IPv6Address {
-    public:
+      public:
 	IPv6Address();
 
 	bool fromString(const char* addrstr);
@@ -161,7 +161,7 @@ class IPv6Address {
 
 	void print();
 
-    private:
+      private:
 	unsigned char _address[16];
 } __attribute__((__packed__));
 
@@ -252,44 +252,77 @@ std::unique_ptr<unsigned char[]> num_to_array(std::string& num_str,
 	return num_ptr;
 }
 
-std::unique_ptr<unsigned char[]> ip_to_array(std::string& ip_str) {
-	std::string ip_addr_delimiter = ".";
-	unsigned int pos{};
-	std::unique_ptr<unsigned char[]> ip_ptr(new unsigned char[4]{});
-	unsigned char* ip_array = ip_ptr.get();
-
-	std::string ip_part_1{}, ip_part_2{}, ip_part_3{}, ip_part_4{};
-
-	pos = ip_str.find(ip_addr_delimiter);
-	ip_part_1 = ip_str.substr(0, pos);
-	ip_str.erase(0, pos + ip_addr_delimiter.length());
-	pos = ip_str.find(ip_addr_delimiter);
-	ip_part_2 = ip_str.substr(0, pos);
-	ip_str.erase(0, pos + ip_addr_delimiter.length());
-	pos = ip_str.find(ip_addr_delimiter);
-	ip_part_3 = ip_str.substr(0, pos);
-	ip_str.erase(0, pos + ip_addr_delimiter.length());
-	ip_part_4 = ip_str;
-
-	ip_array[0] = static_cast<unsigned char>(std::stoi(ip_part_1, 0, 10));
-	ip_array[1] = static_cast<unsigned char>(std::stoi(ip_part_2, 0, 10));
-	ip_array[2] = static_cast<unsigned char>(std::stoi(ip_part_3, 0, 10));
-	ip_array[3] = static_cast<unsigned char>(std::stoi(ip_part_4, 0, 10));
-	return ip_ptr;
-}
-
 std::unique_ptr<unsigned char[]> area_to_bytes(std::string& area_str) {
-	std::string area_part1{},area_part2{};
+	std::string area_part1{}, area_part2{};
 	std::unique_ptr<unsigned char[]> area_ptr(
 	    new unsigned char[(area_str.length() / 2)]{});
-	for (size_t i = 0, j = 0; i < area_str.length() && j < area_str.length();
-	     i += 2, j++) {
+	for (size_t i = 0, j = 0;
+	     i < area_str.length() && j < area_str.length(); i += 2, j++) {
 		area_part1 = area_str[i];
-                area_part2 = area_str[i+1];
-		(area_ptr.get())[j] =
-		    static_cast<unsigned char>(16*std::stoi(area_part1, 0, 16) + std::stoi(area_part2, 0, 16));
+		area_part2 = area_str[i + 1];
+		(area_ptr.get())[j] = static_cast<unsigned char>(
+		    16 * std::stoi(area_part1, 0, 16) +
+		    std::stoi(area_part2, 0, 16));
 	}
 
 	return area_ptr;
+}
+
+/* process tlv 135 */
+
+// void Process_tlv_135( &tlvs, &checksum, &json ) {
+//   }
+
+// prefix to array
+
+std::unique_ptr<unsigned char[]> prefix_to_bytes(std::string prefix) {
+	std::string prefix_delimiter = "/", delimiter = ".";
+	size_t pos = 0;
+	pos = prefix.find(prefix_delimiter);
+	std::string ip = prefix.substr(0, pos);
+	std::string length = prefix.substr(pos + 1);
+
+	std::string part_1{}, part_2{}, part_3{}, part_4{};
+
+	pos = ip.find(delimiter);
+	part_1 = ip.substr(0, pos);
+	ip.erase(0, pos + 1);
+	pos = ip.find(delimiter);
+	part_2 = ip.substr(0, pos);
+	ip.erase(0, pos + 1);
+	pos = ip.find(delimiter);
+	part_3 = ip.substr(0, pos);
+	ip.erase(0, pos + 1);
+	part_4 = ip;
+	std::unique_ptr<unsigned char[]> ip_ptr(new unsigned char[4]{});
+	unsigned char* ip_array = ip_ptr.get();
+	ip_array[0] = static_cast<unsigned char>(std::stoi(part_1, 0, 10));
+	ip_array[1] = static_cast<unsigned char>(std::stoi(part_2, 0, 10));
+	ip_array[2] = static_cast<unsigned char>(std::stoi(part_3, 0, 10));
+	ip_array[3] = static_cast<unsigned char>(std::stoi(part_4, 0, 10));
+	return ip_ptr;
+}
+
+unsigned char prefix_length_to_bytes(std::string prefix) {
+	std::string prefix_delimiter = "/";
+	size_t pos = 0;
+	pos = prefix.find(prefix_delimiter);
+	std::string length = prefix.substr(pos + 1);
+	return static_cast<unsigned char>(std::stoi(length));
+}
+
+std::unique_ptr<unsigned char[]> metric_to_bytes(std::string metric) {
+	unsigned int ip_metric = std::stoi(metric);
+	std::unique_ptr<unsigned char[]> ip_metric_ptr(new unsigned char[4]{});
+	unsigned char* ip_metric_array = ip_metric_ptr.get();
+	ip_metric_array[3] =
+	    static_cast<unsigned char>((ip_metric >> 0) & 0xFF);
+	ip_metric_array[2] =
+	    static_cast<unsigned char>((ip_metric >> 8) & 0xFF);
+	ip_metric_array[1] =
+	    static_cast<unsigned char>((ip_metric >> 16) & 0xFF);
+	ip_metric_array[0] =
+	    static_cast<unsigned char>((ip_metric >> 24) & 0xFF);
+	return ip_metric_ptr;
 }
 

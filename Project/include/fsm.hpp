@@ -41,7 +41,7 @@ class Init : public ISIS_ADJ {
 };
 
 class Up : public ISIS_ADJ {
-	void entry() override { std::cout << "ISIS Adj is : Up" << std::endl; };
+	void entry() override { std::cout << "ISIS Adj is : Up" << std::endl;};
 	void react(ISIS_PKT& e) override;
 	void react(TIMEOUT& e) override;
 };
@@ -70,6 +70,14 @@ void Down::react(ISIS_PKT& e) {
 		tlv_132 payload_2;
 		tlv_1 payload_3;
 
+                 /* payload_4 
+                tlv_229 mt;
+                tlv_229_topology ipv4_topo;
+                ipv4_topo.topology(0);
+                tlv_229_topology ipv6_topo;
+                ipv6_topo.topology(2);
+                mt.tlv_length(4); */
+
 		payload_0.neighbor_sysid(hdr_2_r.system_id());
 		payload_0.ext_neighbor_local_circuit_id(
 		    payload_0_r.ext_local_circuit_id());
@@ -78,13 +86,13 @@ void Down::react(ISIS_PKT& e) {
 		/* length accounts LLC part */
 		hdr_0.length(sizeof(hdr_1) + sizeof(hdr_2) + sizeof(payload_0) +
 			     sizeof(payload_1) + sizeof(payload_2) +
-			     sizeof(payload_3) + 2);
+			     sizeof(payload_3) + 3);  // +6 MT
 		hdr_2.pdu_length(sizeof(hdr_1) + sizeof(hdr_2) +
 				 sizeof(payload_0) + sizeof(payload_1) +
 				 sizeof(payload_2) + sizeof(payload_3));
 
 		os << hdr_0 << hdr_1 << hdr_2 << payload_0 << payload_1
-		   << payload_2 << payload_3;
+		   << payload_2 << payload_3; // << mt << ipv4_topo << ipv6_topo;
 
 		e.endpoint->do_send(&packet);
 		transit<Init>();
@@ -115,6 +123,16 @@ void Init::react(ISIS_PKT& e) {
 		tlv_129 payload_1;
 		tlv_1 payload_2;
 		tlv_132 payload_3;
+                 /* payload_4 
+                tlv_229 mt;
+                tlv_229_topology ipv4_topo;
+                ipv4_topo.topology(0);
+                tlv_229_topology ipv6_topo;
+                ipv6_topo.topology(2);
+                mt.tlv_length(4);
+                */
+
+
 		/* flip to up */
 		payload_0.adjacency_state(up);
 		payload_0.neighbor_sysid(hdr_2_r.system_id());
@@ -124,13 +142,13 @@ void Init::react(ISIS_PKT& e) {
 		hdr_1.length_indicator(20);
 		hdr_0.length(sizeof(hdr_1) + sizeof(hdr_2) + sizeof(payload_0) +
 			     sizeof(payload_1) + sizeof(payload_2) +
-			     sizeof(payload_3) + 2);
+			     sizeof(payload_3) + 3);
 		hdr_2.pdu_length(sizeof(hdr_1) + sizeof(hdr_2) +
 				 sizeof(payload_0) + sizeof(payload_1) +
-				 sizeof(payload_2) + sizeof(payload_3));
+				 sizeof(payload_2) + sizeof(payload_3));  // +6 mt
 
 		os << hdr_0 << hdr_1 << hdr_2 << payload_0 << payload_1
-		   << payload_2 << payload_3;
+		   << payload_2 << payload_3; //<< mt << ipv4_topo << ipv6_topo;
 
 		e.endpoint->do_send(&packet);
 
@@ -151,7 +169,7 @@ void Up::react(ISIS_PKT& e) {
 	/* CSNP and CSNP support from neighbor is not required for now, will be
 	 * added later */
 
-	if (hdr_1_r.pdu_type() == p2p_hello && payload_0_r.adjacency_state() == up) {
+	if ((hdr_1_r.pdu_type() == p2p_hello) && (payload_0_r.adjacency_state() == up) ) {
 #ifdef DEBUG
 		std::cout << "Got hello packet in Up" << std::endl;
 #endif
@@ -164,6 +182,17 @@ void Up::react(ISIS_PKT& e) {
 		tlv_129 payload_1;
 		tlv_1 payload_2;
 		tlv_132 payload_3;
+                /* payload_4 
+                tlv_229 mt;
+                tlv_229_topology ipv4_topo;
+                ipv4_topo.topology(0);
+                tlv_229_topology ipv6_topo;
+                ipv4_topo.topology(2);
+                mt.tlv_length(4);
+                */ 
+  
+
+
 		/* flip to up */
 		payload_0.adjacency_state(up);
 		payload_0.neighbor_sysid(hdr_2_r.system_id());
@@ -173,13 +202,13 @@ void Up::react(ISIS_PKT& e) {
 		hdr_1.length_indicator(20);
 		hdr_0.length(sizeof(hdr_1) + sizeof(hdr_2) + sizeof(payload_0) +
 			     sizeof(payload_1) + sizeof(payload_2) +
-			     sizeof(payload_3) + 2);
+			     sizeof(payload_3) + 3);
 		hdr_2.pdu_length(sizeof(hdr_1) + sizeof(hdr_2) +
 				 sizeof(payload_0) + sizeof(payload_1) +
-				 sizeof(payload_2) + sizeof(payload_3));
+				 sizeof(payload_2) + sizeof(payload_3)); //+6 mt
 
 		os << hdr_0 << hdr_1 << hdr_2 << payload_0 << payload_1
-		   << payload_2 << payload_3;
+		   << payload_2 << payload_3; // << mt << ipv4_topo << ipv6_topo;
 
 		e.endpoint->do_send(&packet);
 
@@ -193,13 +222,13 @@ void Up::react(ISIS_PKT& e) {
 		eth_header hdr_0;
 		isis_header hdr_1;
 		isis_csnp_header hdr_2;
-		tlv_9 payload_0;
+		//tlv_9 payload_0;
+                //isis_csnp_1lsp payload_0;
 		hdr_1.pdu_type(l2_csnp);
-		hdr_1.length_indicator(20);
-		payload_0.tlv_length(0);
-		hdr_0.length(sizeof(hdr_1) + sizeof(hdr_2) + sizeof(payload_0) +
-			     2);
-		os << hdr_0 << hdr_1 << hdr_2 << payload_0;
+                hdr_2.pdu_length(sizeof(hdr_1) + sizeof(hdr_2)); //+ sizeof(payload_0));
+		hdr_1.length_indicator(33);
+		hdr_0.length(3 + sizeof(hdr_1) + sizeof(hdr_2)); //+ sizeof(payload_0));
+		os << hdr_0 << hdr_1 << hdr_2; //<< payload_0;
 		e.endpoint->do_send(&packet);
 
 	} else {

@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <malloc.h>
 
 #include <boost/asio.hpp>
 #include <cctype>
@@ -6,24 +7,41 @@
 #include <cstdlib>
 #include <iostream>
 #include <thread>
+#include <mutex>
+#include <condition_variable>
 
 #include "fsm.hpp"
+#include "get_version.h"
 #include "io.hpp"
 #include "parser.hpp"
 #include "tinyfsm.hpp"
 
+
+std::mutex mtx;
+std::condition_variable cv;
+bool Flood = false;
+
 int main(int argc, char* argv[]) {
 	if (argc < 3) {
-		std::cerr << "Usage: repl [interface] [json database file]\n";
+		std::cerr << "Usage: isis-mocker [interface] [json database file]\n";
 		return EXIT_FAILURE;
 	}
 
-	std::cout << "ISIS database replicator" << std::endl;
+	std::cout << R"(
+  ___ ____ ___ ____        __  __  ___   ____ _  _______ ____  
+ |_ _/ ___|_ _/ ___|      |  \/  |/ _ \ / ___| |/ / ____|  _ \
+  | |\___ \| |\___ \ _____| |\/| | | | | |   | ' /|  _| | |_) |
+  | | ___) | | ___) |_____| |  | | |_| | |___| . \| |___|  _ < 
+ |___|____/___|____/      |_|  |_|\___/ \____|_|\_\_____|_| \_\)"
+		  << std::endl;
+	std::cout << " version: "
+		  << "0.0." << version() << std::endl;
 
 	std::map<std::string, std::string> LSDB;
 
 	try {
 		parse(LSDB, std::string(argv[2]));
+                malloc_trim(0);
 		boost::asio::io_context io_context;
 		IO s(io_context, argv[1]);
 		fsm_list::start();
@@ -46,13 +64,13 @@ int main(int argc, char* argv[]) {
 			}
 		});
 
-		/* flood loop depending on SM state */
 		std::thread flooder_th([&] {
 			while (1) {
-				if (ISIS_ADJ::is_in_state<Up>()) {
+                                        std::unique_lock<std::mutex> lock(mtx);
+                                        cv.wait( lock, []() { return Flood; } );
 					std::cout << std::endl
-						  << "flooding LSPs to DUT";
-					/*<< std::endl;*/
+						  << "flooding LSPs to DUT"
+						  << std::endl;
 
 					for (auto const& [key, value] : LSDB) {
 						boost::asio::streambuf sbuf;
@@ -60,21 +78,15 @@ int main(int argc, char* argv[]) {
 						sbuf.prepare(value.size());
 						os << value;
 						s.do_send(&sbuf);
+                                                std::this_thread::sleep_for(std::chrono::milliseconds(10));
 						std::string new_value = value;
 						std::string seq_num_str =
 						    value.substr(37, 4);
-						unsigned int seq_num =
-						    (unsigned int)(seq_num_str
-								       [3]) +
-						    (unsigned int)(16 *
-								   seq_num_str
-								       [2]) +
-						    (unsigned int)(256 *
-								   seq_num_str
-								       [1]) +
-						    (unsigned int)(4096 *
-								   seq_num_str
-								       [0]);
+
+						unsigned int seq_num = static_cast<unsigned int>(static_cast<unsigned char>(seq_num_str[0])) << 24 | 
+                                                                       static_cast<unsigned int>(static_cast<unsigned char>(seq_num_str[1])) << 16 |
+                                                                       static_cast<unsigned int>(static_cast<unsigned char>(seq_num_str[2])) << 8  |
+                                                                       static_cast<unsigned int>(static_cast<unsigned char>(seq_num_str[3]));
 						seq_num++;
 						new_value[40] =
 						    seq_num & 0x000000ff;
@@ -113,30 +125,36 @@ int main(int argc, char* argv[]) {
 							checksum & 0xFF);
 						LSDB[key] = new_value;
 					}
-					/*std::cout << "sleeping" <<
-					 * std::endl;*/
-					std::cout << "|";
-					for (unsigned int i = 0; i < 3; i++) {
-						std::cout << "\b/"
-							  << std::flush;
-						sleep(0.5);
-						std::cout << "\b-"
-							  << std::flush;
-						sleep(0.5);
-						std::cout << "\b\\"
-							  << std::flush;
-						sleep(0.5);
-						std::cout << "\b|"
-							  << std::flush;
-						sleep(0.5);
-					}
-                                        std::cout << "\b ";
-					std::cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b" << std::flush;
-					std::this_thread::sleep_for(
-					    std::chrono::seconds(1000));
-				}
+					std::cout << "sleeping" << std::endl;
+                                        Flood = false;
 			}
 		});
+                /* flood dispatch */
+                std::thread dispatcher_th([&] {
+                                 bool Previous = false;
+                                 unsigned int count{}; 
+                                 while(1) {
+                                    if (ISIS_ADJ::is_in_state<Up>() && !Previous) { 
+                                          std::lock_guard<std::mutex> lock(mtx); 
+                                          Flood = true; 
+                                          cv.notify_one();
+                                          count = 0;
+                                   }
+                                   if (ISIS_ADJ::is_in_state<Up>() && Previous) { 
+                                          count++;
+                                          if (count > 190 ) {
+                                                  std::lock_guard<std::mutex> lock(mtx);
+                                                  Flood = true;
+                                                  cv.notify_one(); 
+                                                  count = 0; 
+                                          }
+                                   }
+                                   
+                                   Previous = ISIS_ADJ::is_in_state<Up>();
+                                   std::this_thread::sleep_for(std::chrono::seconds(5));
+                                   
+                            }              
+               });
 
 		/* main loop */
 		while (1) {
@@ -163,6 +181,7 @@ int main(int argc, char* argv[]) {
 		}
 		timer_th.join();
 		flooder_th.join();
+                dispatcher_th.join();
 
 	} catch (std::exception& e) {
 		std::cerr << "Exception: " << e.what() << "\n";

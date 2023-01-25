@@ -1,56 +1,36 @@
-ISIS database replicator app
-Nov 2022
---------------------------------------------------------------------------------------------------------------------------------------------
-Tool allowing replication (injection) of exported ISIS database in json format to a real router. 
-ONLY L2 P2P adjacency supported, only Linux OS. App requires the following libs as dependancies:
-- boost::asio;
-- gtest(only for tests binary).
+isis-mocker app 2023
+----------------------------------------------------------------------------------------------------------------------------------------------
+Tool provides replication (injection) of exported ISIS database in json format to a real router.
+ONLY L2 P2P adjacency supported. Tested on Linux, package generated is deb.
 
 App uses the following parameters as encoded:
 
 MAC address: 00:0c:29:6f:14:bf
 NET address: 0001.0000.0001.00
 AREA address: 49.0001
-IP address/mask: 10.100.0.1 255.255.255.254   
+IP address/mask: 10.100.0.1 255.255.255.254
 
 
-usage: 
+usage:
 - get 2 outputs from Junos router:
     show isis database extensive | display json | no-more
     show isis hostname | no-more
 
   From the second command grab first 2 columns and save to subs.txt (each pair on a new line), for example:
   0001.0001.0001 vmx1
-  
-   Use attached script prepare_json.sh to create valid json, for example 
-   ./prepare_json.sh subs.txt simple.json   <---- simple.json is json file taken by the first command
-   Result file is ready_for_repl.json, use it for the program input. 
+
+   Use script prepare_json.sh to create valid json, for example
+   ./prepare_json.sh subs.txt customer.json   <---- customer.json is json file taken by the first command
+   Result file is ready.json, use it for the program input.
 
 
 -  Run the program providing json file and nic name, for example:
-   ./repl eth0 ready_for_repl.json
+   isis-mocker eth0 ready.json
 
 
 DUT(device under test) router config example:
 
-Cisco XR
-
-router isis 1
- net 49.0003.0003.0003.0003.00
- max-lsp-lifetime 65535
- address-family ipv4 unicast
- !
- interface GigabitEthernet0/0/0/1
-  circuit-type level-2-only
-  point-to-point
-  address-family ipv4 unicast
-  !
-
-interface GigabitEthernet0/0/0/1
- ipv4 address 10.100.0.0 255.255.255.254
-!
-
-Junos 
+Junos
 
 interfaces {
       lo0 {
@@ -79,12 +59,73 @@ protocols {
      }
 }
 
+demo lab topo run:
+
+
+root@salt:/var/tmp/demo# isis-mocker eth1 ready.json
+
+   ___ ____ ___ ____        __  __  ___   ____ _  _______ ____
+  |_ _/ ___|_ _/ ___|      |  \/  |/ _ \ / ___| |/ / ____|  _ \
+   | |\___ \| |\___ \ _____| |\/| | | | | |   | ' /|  _| | |_) |
+   | | ___) | | ___) |_____| |  | | |_| | |___| . \| |___|  _ <
+  |___|____/___|____/      |_|  |_|\___/ \____|_|\_\_____|_| \_\
+  version: 0.0.3
+Loading JSON ...
+done
+Found LSPs: 3297
+LSP-ID 0000.0000.0000.00-00
+LSP-ID 0000.0000.0001.00-00
+LSP-ID 0000.0000.0002.00-00
+LSP-ID 0000.0000.0003.00-00
+LSP-ID 0000.0000.0004.00-00
+LSP-ID 0000.0000.0005.00-00
+LSP-ID 0000.0000.0006.00-00
+LSP-ID 0000.0000.0007.00-00
+LSP-ID 0000.0000.0008.00-00
+<snip>
+
+ISIS Adj is : Down
+ISIS Adj is : Init
+ISIS Adj is : Up
+
+flooding LSPs to DUT
+sleeping
+
+root@Junos-DUT> show version
+Hostname: Junos-DUT
+Model: vmx
+Junos: 21.3R1.9
+
+root@Junos-DUT> show route summary
+Router ID: 5.5.5.5
+
+Highwater Mark (All time / Time averaged watermark)
+    RIB unique destination routes: 10776 at 2023-01-21 18:00:53 / 19
+    RIB routes                   : 10778 at 2023-01-21 18:00:53 / 20
+    FIB routes                   : 10758 at 2023-01-21 18:00:55 / 1
+    VRF type routing instances   : 0 at 2023-01-17 09:14:49
+
+inet.0: 10752 destinations, 10753 routes (10752 active, 0 holddown, 0 hidden)
+              Direct:      4 routes,      4 active
+               Local:      3 routes,      3 active
+               IS-IS:  10745 routes,  10744 active   <-----
+     Access-internal:      1 routes,      1 active
+
+iso.0: 1 destinations, 1 routes (1 active, 0 holddown, 0 hidden)
+              Direct:      1 routes,      1 active
+
+inet6.0: 2 destinations, 2 routes (2 active, 0 holddown, 0 hidden)
+               Local:      1 routes,      1 active
+               INET6:      1 routes,      1 active
+
 
 
 ----------------------------------------------------------------------------------------------------------------------------------------------
+Depends
+
+libc6 (>= 2.14), libgcc-s1 (>= 3.0), libstdc++6 (>= 9)
+
 License
 
-ISIS database replicator(repl binary) is Open Source software. It may be used for any purpose, including commercial purposes, 
+Application isis-mocker is an Open Source software. It may be used for any purpose, including commercial purposes,
 at absolutely no cost. It is distributed under the terms of the MIT license.
-
-
