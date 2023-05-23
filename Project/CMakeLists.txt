@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 3.10)
 
 project(isis-mocker CXX)
-set(MINOR_VERSION "1" CACHE INTERNAL "Minor version")
-set(PATCH_VERSION "0" CACHE INTERNAL "Patch version")
-set(PROJECT_VERSION 0.${MINOR_VERSION}.${PATCH_VERSION})
+set(MAJOR_VERSION "0" CACHE INTERNAL "Major version")
+set(MINOR_VERSION "0" CACHE INTERNAL "Minor version")
+set(PATCH_VERSION "9" CACHE INTERNAL "Patch version")
+set(PROJECT_VERSION ${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION})
 project(isis-mocker VERSION ${PROJECT_VERSION})
 
 configure_file(version.h.in include/version.h)

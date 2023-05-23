@@ -7,8 +7,8 @@
 using namespace std;
 
 template <typename T>
-::testing::AssertionResult ArraysMatch(T* expected, T* actual) {
-	for (int i = 0; i < sizeof(expected); i++) {
+::testing::AssertionResult ArraysMatch(T* expected, T* actual, int size) {
+	for (int i = 0; i < size; i++) {
 		if (expected[i] != actual[i]) {
 			return ::testing::AssertionFailure()
 			       << "array[" << i << "] (" << actual[i]
@@ -46,14 +46,52 @@ TEST(utils, fletcher_chksum) {
 		  htons(fletcher_checksum(PDU + 12, sizeof(PDU) - 12, 12)));
 }
 
+TEST(utils, parameter_set_sysid) {
+       unsigned char expected_array[] = {0x0a, 0xc1, 0x00, 0x01, 0x00, 0x01};
+       unsigned char result[6]{};
+       std::string input = {"0ac1.0001.0001"};
+       setParam<sysid>(result, input);
+       EXPECT_TRUE(ArraysMatch<unsigned char>(expected_array, result, sizeof(expected_array)));
+}
+
+TEST(utils, parameter_set_hostname_good) {
+       unsigned char expected_array[11] = {0x6d, 0x6f, 0x63, 0x6b, 0x65, 0x72, 0x31, 0x35, 0x00, 0x00, 0x00};
+       unsigned char result[11]{};
+       std::string input = {"mocker15"};
+       setParam<hostname>(result, input);
+       EXPECT_TRUE(ArraysMatch<unsigned char>(expected_array, result,sizeof(expected_array)));
+}
+
+TEST(utils, parameter_set_hostname_bad) {
+       unsigned char expected_array[11] = {};
+       unsigned char result[11] = {};
+       std::string input = {"mocker155555"};
+       setParam<hostname>(result, input);
+       EXPECT_TRUE(ArraysMatch<unsigned char>(expected_array, result,sizeof(expected_array)));
+}
+
+
+TEST(utils, parameter_set_sysid_good) {
+       unsigned char expected_array[7] = {0x00, 0x10, 0x00, 0x10, 0x00, 0x10, 0x00};
+       unsigned char result[7]{};
+       std::string input = {"0010.0010.0010"};
+       setParam<sysid>(result, input);
+       EXPECT_TRUE(ArraysMatch<unsigned char>(expected_array, result,sizeof(expected_array)));
+}
+
+
+
 TEST(structs, eth_header) {
 	unsigned char expected_hdr[] = {0x09, 0x00, 0x2b, 0x00, 0x00, 0x05,
 					0x00, 0x0c, 0x29, 0x6f, 0x14, 0xbf,
 					0x00, 0x00, 0xfe, 0xfe, 0x03};
 	eth_header hdr;
 	ASSERT_EQ(0, hdr.length());
-	EXPECT_TRUE(ArraysMatch<unsigned char>(expected_hdr, hdr.dmac()));
+	EXPECT_TRUE(ArraysMatch<unsigned char>(expected_hdr, hdr.dmac(), sizeof(expected_hdr)));
 }
+
+
+
 
 int main(int argc, char** argv) {
 	testing::InitGoogleTest(&argc, argv);

@@ -2,6 +2,9 @@
 
 #include "version.h"
 
-int version() {
+int patch_version() {
     return PROJECT_VERSION_PATCH;
+}
+int version() {
+    return PROJECT_VERSION_MINOR;
 }

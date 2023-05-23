@@ -10,9 +10,10 @@
 #include <iostream>
 #include <istream>
 #include <streambuf>
+#include <regex>
+#include <algorithm>
 
-std::ostream& render_printable_chars(std::ostream& os, const char* buffer,
-				     size_t bufsize) {
+std::ostream& render_printable_chars(std::ostream& os, const char* buffer, size_t bufsize) {
 	os << " | ";
 	for (size_t i = 0; i < bufsize; ++i) {
 		if (std::isprint(buffer[i])) {
@@ -24,8 +25,7 @@ std::ostream& render_printable_chars(std::ostream& os, const char* buffer,
 	return os;
 }
 
-std::ostream& hex_dump(std::ostream& os, const uint8_t* buffer, size_t bufsize,
-		       bool showPrintableChars = true) {
+std::ostream& hex_dump(std::ostream& os, const uint8_t* buffer, size_t bufsize, bool showPrintableChars = true) {
 	auto oldFormat = os.flags();
 	auto oldFillChar = os.fill();
 
@@ -36,11 +36,7 @@ std::ostream& hex_dump(std::ostream& os, const uint8_t* buffer, size_t bufsize,
 	for (; i < bufsize; ++i) {
 		if (i % 8 == 0) {
 			if (i != 0 && showPrintableChars) {
-				render_printable_chars(
-				    os,
-				    reinterpret_cast<const char*>(&buffer[i] -
-								  8),
-				    8);
+				render_printable_chars(os, reinterpret_cast<const char*>(&buffer[i] - 8), 8);
 			}
 			os << std::endl;
 			printBlank = false;
@@ -57,9 +53,7 @@ std::ostream& hex_dump(std::ostream& os, const uint8_t* buffer, size_t bufsize,
 		for (size_t j = 0; j < 8 - (i % 8); ++j) {
 			os << "   ";
 		}
-		render_printable_chars(
-		    os, reinterpret_cast<const char*>(&buffer[i] - (i % 8)),
-		    (i % 8));
+		render_printable_chars(os, reinterpret_cast<const char*>(&buffer[i] - (i % 8)), (i % 8));
 	}
 
 	os << std::endl;
@@ -70,10 +64,8 @@ std::ostream& hex_dump(std::ostream& os, const uint8_t* buffer, size_t bufsize,
 	return os;
 }
 
-std::ostream& hex_dump(std::ostream& os, const std::string& buffer,
-		       bool showPrintableChars = true) {
-	return hex_dump(os, reinterpret_cast<const uint8_t*>(buffer.data()),
-			buffer.length(), showPrintableChars);
+std::ostream& hex_dump(std::ostream& os, const std::string& buffer, bool showPrintableChars = true) {
+	return hex_dump(os, reinterpret_cast<const uint8_t*>(buffer.data()), buffer.length(), showPrintableChars);
 }
 
 #define FLETCHER_CHECKSUM_VALIDATE 0xffff
@@ -86,8 +78,7 @@ std::ostream& hex_dump(std::ostream& os, const std::string& buffer,
    index required in the specification ISO 8473, Annex C.1 */
 /* calling with offset == FLETCHER_CHECKSUM_VALIDATE will validate the checksum
    without modifying the buffer; a valid checksum returns 0 */
-uint16_t fletcher_checksum(uint8_t* buffer, const size_t len,
-			   const uint16_t offset) {
+uint16_t fletcher_checksum(uint8_t* buffer, const size_t len, const uint16_t offset) {
 	uint8_t* p;
 	int x, y, c0, c1;
 	uint16_t checksum = 0;
@@ -100,8 +91,7 @@ uint16_t fletcher_checksum(uint8_t* buffer, const size_t len,
 		// assert(offset
 		//       < (len - 1)); /* account for two bytes of checksum */
 		if (offset >= (len - 1)) {
-			std::cout << "Warning, offset equal or more than len-1"
-				  << std::endl;
+			std::cout << "Warning, offset equal or more than len-1" << std::endl;
 		}
 		csum = (uint16_t*)(buffer + offset);
 		*(csum) = 0;
@@ -153,7 +143,7 @@ uint16_t fletcher_checksum(uint8_t* buffer, const size_t len,
 }
 
 class IPv6Address {
-      public:
+    public:
 	IPv6Address();
 
 	bool fromString(const char* addrstr);
@@ -161,7 +151,7 @@ class IPv6Address {
 
 	void print();
 
-      private:
+    private:
 	unsigned char _address[16];
 } __attribute__((__packed__));
 
@@ -234,8 +224,7 @@ bool IPv6Address::fromString(const char* addrstr) {
 	return 1;
 }
 
-std::unique_ptr<unsigned char[]> num_to_array(std::string& num_str,
-					      unsigned int size) {
+std::unique_ptr<unsigned char[]> num_to_array(std::string& num_str, unsigned int size) {
 	unsigned int num{};
 	if (!num_str.find("0x")) {
 		num_str.erase(0, 2);
@@ -254,15 +243,11 @@ std::unique_ptr<unsigned char[]> num_to_array(std::string& num_str,
 
 std::unique_ptr<unsigned char[]> area_to_bytes(std::string& area_str) {
 	std::string area_part1{}, area_part2{};
-	std::unique_ptr<unsigned char[]> area_ptr(
-	    new unsigned char[(area_str.length() / 2)]{});
-	for (size_t i = 0, j = 0;
-	     i < area_str.length() && j < area_str.length(); i += 2, j++) {
+	std::unique_ptr<unsigned char[]> area_ptr(new unsigned char[(area_str.length() / 2)]{});
+	for (size_t i = 0, j = 0; i < area_str.length() && j < area_str.length(); i += 2, j++) {
 		area_part1 = area_str[i];
 		area_part2 = area_str[i + 1];
-		(area_ptr.get())[j] = static_cast<unsigned char>(
-		    16 * std::stoi(area_part1, 0, 16) +
-		    std::stoi(area_part2, 0, 16));
+		(area_ptr.get())[j] = static_cast<unsigned char>(16 * std::stoi(area_part1, 0, 16) + std::stoi(area_part2, 0, 16));
 	}
 
 	return area_ptr;
@@ -315,14 +300,80 @@ std::unique_ptr<unsigned char[]> metric_to_bytes(std::string metric) {
 	unsigned int ip_metric = std::stoi(metric);
 	std::unique_ptr<unsigned char[]> ip_metric_ptr(new unsigned char[4]{});
 	unsigned char* ip_metric_array = ip_metric_ptr.get();
-	ip_metric_array[3] =
-	    static_cast<unsigned char>((ip_metric >> 0) & 0xFF);
-	ip_metric_array[2] =
-	    static_cast<unsigned char>((ip_metric >> 8) & 0xFF);
-	ip_metric_array[1] =
-	    static_cast<unsigned char>((ip_metric >> 16) & 0xFF);
-	ip_metric_array[0] =
-	    static_cast<unsigned char>((ip_metric >> 24) & 0xFF);
+	ip_metric_array[3] = static_cast<unsigned char>((ip_metric >> 0) & 0xFF);
+	ip_metric_array[2] = static_cast<unsigned char>((ip_metric >> 8) & 0xFF);
+	ip_metric_array[1] = static_cast<unsigned char>((ip_metric >> 16) & 0xFF);
+	ip_metric_array[0] = static_cast<unsigned char>((ip_metric >> 24) & 0xFF);
 	return ip_metric_ptr;
+}
+
+bool isKthBitSet(unsigned char n, int k) {
+	if (n & (1 << k))
+		return true;
+	else
+		return false;
+}
+
+void incrSequenceNum(std::unordered_map<std::string, std::string>& LSDB, const std::string& key, const std::string& value) {
+	std::string new_value = value;
+	std::string seq_num_str = value.substr(37, 4);
+
+	unsigned int seq_num = static_cast<unsigned int>(static_cast<unsigned char>(seq_num_str[0])) << 24 |
+			       static_cast<unsigned int>(static_cast<unsigned char>(seq_num_str[1])) << 16 |
+			       static_cast<unsigned int>(static_cast<unsigned char>(seq_num_str[2])) << 8 |
+			       static_cast<unsigned int>(static_cast<unsigned char>(seq_num_str[3]));
+	seq_num++;
+	new_value[40] = seq_num & 0x000000ff;
+	new_value[39] = (seq_num & 0x0000ff00) >> 8;
+	new_value[38] = (seq_num & 0x00ff0000) >> 16;
+	new_value[37] = (seq_num & 0xff000000) >> 24;
+	std::unique_ptr<unsigned char[]> checksum_temp_ptr(new unsigned char[new_value.size() - 17]{});
+	unsigned char* checksum_temp = checksum_temp_ptr.get();
+	new_value[41] = 0;
+	new_value[42] = 0;
+	std::memcpy(checksum_temp, new_value.c_str() + 17, new_value.size() - 17);
+
+	unsigned short checksum = htons(fletcher_checksum(checksum_temp + 12, new_value.size() - 29, 12));
+	new_value[41] = static_cast<unsigned char>(checksum >> 8);
+	new_value[42] = static_cast<unsigned char>(checksum & 0xFF);
+	LSDB[key] = new_value;
+
+	return;
+}
+
+
+enum param_type { address = 4, sysid = 6, hostname = 11 };
+
+
+static std::regex sysid_re{R"(([0-9a-fA-F]{2}))"};
+static std::regex ipv4_re{R"((\d+))"};
+
+template<param_type t> 
+void setParam(unsigned char* , const std::string& ) { }
+
+template<>
+void setParam<address>(unsigned char* destination, const std::string& param) { 
+        std::array<unsigned char, 4> ipV4_temp{};
+         std::transform(std::sregex_token_iterator(param.begin(), param.end(), ipv4_re), {}, ipV4_temp.begin(),
+                            [](const std::string& s){ return static_cast<unsigned char>(std::stoi(s));});
+         if ( ipV4_temp[0]  )  std::memcpy(destination,ipV4_temp.data(), 4);
+         return ;
+}
+
+template<>
+void setParam<sysid>(unsigned char* destination, const std::string& param) {
+         std::array<unsigned char, 6> sysID_temp{};
+         std::transform(std::sregex_token_iterator(param.begin(), param.end(), sysid_re), {}, sysID_temp.begin(),
+                                   [](const std::string& s){ return static_cast<unsigned char>(std::stoi(s,0,16));});
+        if ( sysID_temp[5] ) std::memcpy(destination,sysID_temp.data(), 6);
+        return ;
+
+}
+
+template<>
+void setParam<hostname>(unsigned char* destination, const std::string& param) {
+         if ( param.size() > 11 ) return;
+          std::fill(destination, destination+11, 0);
+          std::memcpy(destination,param.c_str(), param.size());
 }
 

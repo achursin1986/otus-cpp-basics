@@ -2,6 +2,7 @@
 #include <malloc.h>
 
 #include <boost/asio.hpp>
+#include <boost/program_options.hpp>
 #include <cctype>
 #include <chrono>
 #include <cstdlib>
@@ -9,6 +10,7 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include <array>
 
 #include "fsm.hpp"
 #include "get_version.h"
@@ -17,15 +19,78 @@
 #include "tinyfsm.hpp"
 
 
+namespace bpo = boost::program_options;
+
+
 std::mutex mtx;
 std::condition_variable cv;
 bool Flood = false;
+std::string json_file{}, ifname{};
 
 int main(int argc, char* argv[]) {
-	if (argc < 3) {
-		std::cerr << "Usage: isis-mocker [interface] [json database file]\n";
-		return EXIT_FAILURE;
-	}
+        try {
+           bpo::options_description desc("options");
+
+                desc.add_options()
+                    ("help", "show help")
+                    ("ifname", bpo::value<std::string>(&ifname)->required(), "interface name, required")
+                    ("json-file", bpo::value<std::string>(&json_file)->required(), "json input file, required")
+                    ("ipaddress", bpo::value<std::string>(), "mocker ip address, mask /31")
+                    ("dut_ipaddress", bpo::value<std::string>(), "dut ip address, mask /31")
+                    ("mock_ipaddress1", bpo::value<std::string>(), "used to mock adj, mask /31")
+                    ("mock_ipaddress2", bpo::value<std::string>(), "used to mock adj, mask /31")
+                    ("sysid", bpo::value<std::string>(), "sysid, for example 0001.0001.0001")
+                    ("dut_sysid", bpo::value<std::string>(), "dut sysid, for example 0001.0001.0001")
+                    ("hostname", bpo::value<std::string>(), "hostname mocker shows in isis, 11 symbols max")
+                    ("version", "show version") 
+                ;
+              
+
+               bpo::variables_map vm;
+               bpo::store(bpo::parse_command_line(argc, argv, desc), vm);
+
+                if (vm.count("help")) {
+                        std::cout << desc << std::endl;
+                        return 1;
+                }
+
+                 if (vm.count("version")) {
+
+                        std::cout << "version: " << "0."<< version() << "."<< patch_version() << std::endl;
+                        return 1;
+                }
+
+                bpo::notify(vm);
+               
+                if (vm.count("ipaddress") && vm.count("dut_ipaddress")) {
+                        setParam<address>(OUR_IP_ADDRESS, vm["ipaddress"].as<std::string>());                    
+                        setParam<address>(DUT_IP_ADDRESS, vm["dut_ipaddress"].as<std::string>()); 
+                }
+
+                if (vm.count("mock_ipaddress1") && vm.count("mock_ipaddress2")) {
+                        setParam<address>(FAKE_IP_ADDRESS2, vm["mock_ipaddress1"].as<std::string>());
+                        setParam<address>(FAKE_IP_ADDRESS3, vm["mock_ipaddress2"].as<std::string>());
+                }
+
+                if (vm.count("sysid") && vm.count("dut_sysid")) {
+                        setParam<sysid>(SYS_ID, vm["sysid"].as<std::string>());
+                        setParam<sysid>(SOURCE_ID, vm["sysid"].as<std::string>());
+                        setParam<sysid>(OUR_LSP_ID, vm["sysid"].as<std::string>());
+                        setParam<sysid>(DUT_SYS_ID, vm["dut_sysid"].as<std::string>());
+                }
+
+                if (vm.count("hostname")) {
+                        setParam<hostname>(OUR_HOSTNAME, vm["hostname"].as<std::string>());
+                }
+                
+
+        } catch (std::exception& e) {
+                std::cerr << "Exception: " <<  e.what() << std::endl;
+                std::cerr << "Use --help to get options list" << std::endl;
+                return 1;
+        }
+
+
 
 	std::cout << R"(
   ___ ____ ___ ____        __  __  ___   ____ _  _______ ____  
@@ -34,16 +99,14 @@ int main(int argc, char* argv[]) {
   | | ___) | | ___) |_____| |  | | |_| | |___| . \| |___|  _ < 
  |___|____/___|____/      |_|  |_|\___/ \____|_|\_\_____|_| \_\)"
 		  << std::endl;
-	std::cout << " version: "
-		  << "0.0." << version() << std::endl;
-
-	std::map<std::string, std::string> LSDB;
+        std::cout << " version: " << "0."<< version() << "." << patch_version() << std::endl;
+	std::unordered_map<std::string, std::string> LSDB;
 
 	try {
-		parse(LSDB, std::string(argv[2]));
+		parse(LSDB, json_file);
                 malloc_trim(0);
 		boost::asio::io_context io_context;
-		IO s(io_context, argv[1]);
+		IO s(io_context, &ifname[0]);
 		fsm_list::start();
 
 		boost::asio::io_context timer;
@@ -79,51 +142,7 @@ int main(int argc, char* argv[]) {
 						os << value;
 						s.do_send(&sbuf);
                                                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
-						std::string new_value = value;
-						std::string seq_num_str =
-						    value.substr(37, 4);
-
-						unsigned int seq_num = static_cast<unsigned int>(static_cast<unsigned char>(seq_num_str[0])) << 24 | 
-                                                                       static_cast<unsigned int>(static_cast<unsigned char>(seq_num_str[1])) << 16 |
-                                                                       static_cast<unsigned int>(static_cast<unsigned char>(seq_num_str[2])) << 8  |
-                                                                       static_cast<unsigned int>(static_cast<unsigned char>(seq_num_str[3]));
-						seq_num++;
-						new_value[40] =
-						    seq_num & 0x000000ff;
-						new_value[39] =
-						    (seq_num & 0x0000ff00) >> 8;
-						new_value[38] =
-						    (seq_num & 0x00ff0000) >>
-						    16;
-						new_value[37] =
-						    (seq_num & 0xff000000) >>
-						    24;
-						std::unique_ptr<unsigned char[]>
-						checksum_temp_ptr(
-						    new unsigned char
-							[new_value.size() -
-							 17]{});
-						unsigned char* checksum_temp =
-						    checksum_temp_ptr.get();
-						new_value[41] = 0;
-						new_value[42] = 0;
-						std::memcpy(
-						    checksum_temp,
-						    new_value.c_str() + 17,
-						    new_value.size() - 17);
-
-						unsigned short checksum =
-						    htons(fletcher_checksum(
-							checksum_temp + 12,
-							new_value.size() - 29,
-							12));
-						new_value[41] =
-						    static_cast<unsigned char>(
-							checksum >> 8);
-						new_value[42] =
-						    static_cast<unsigned char>(
-							checksum & 0xFF);
-						LSDB[key] = new_value;
+                                                incrSequenceNum(LSDB,key,value);
 					}
 					std::cout << "sleeping" << std::endl;
                                         Flood = false;
@@ -166,7 +185,7 @@ int main(int argc, char* argv[]) {
 			    [&](boost::system::error_code ec) {
 				    if (!ec) {
 					    TIMEOUT to;
-					    send_event(to);
+					    send_event(to);  
 				    }
 			    });
 			ISIS_PKT packet;
@@ -184,7 +203,7 @@ int main(int argc, char* argv[]) {
                 dispatcher_th.join();
 
 	} catch (std::exception& e) {
-		std::cerr << "Exception: " << e.what() << "\n";
+		std::cerr << "Exception: " << e.what() << std::endl;
 	}
 
 	return 0;
