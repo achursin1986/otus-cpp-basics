@@ -20,8 +20,10 @@ Tool uses the following parameters as encoded:
 #### Installation and run
 Get .deb package, install using pkg manager.
 
-since 0.0.9 supported defaukt params change, for example:
+since version 0.0.9 supported default params change, for example:
+```
 isis-mocker --ifname eth1 --json-file out.json --ipaddress 10.102.0.1 --dut_ipaddress 10.102.0.0 --hostname m1 --sysid 0010.0010.0010 --dut_sysid 0003.0003.0003
+```
 
 #### JSON preparation
 * Get 2 outputs from Junos router:
