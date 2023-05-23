@@ -94,7 +94,7 @@ protocols {
 
 Sample run:
 ```
-root@salt:/var/tmp/DT/new2/fresh# isis-mocker eth1 out.json | more
+root@salt:/var/tmp/fresh# isis-mocker eth1 out.json | more
 
   ___ ____ ___ ____        __  __  ___   ____ _  _______ ____
  |_ _/ ___|_ _/ ___|      |  \/  |/ _ \ / ___| |/ / ____|  _ \
@@ -126,22 +126,6 @@ hostname: DA1-SB2
 
 <snip>
 
-LSP-ID 2170.0518.8242.00-00
-hostname: LAB-SPE242
-LSP-ID 2170.0518.8244.00-00
-hostname: LAB-SPE244
-LSP-ID 2170.0518.8245.00-00
-hostname: LAB-SPE245
-LSP-ID 2170.0518.8246.00-00
-hostname: LAB-SPE246
-LSP-ID 2170.0518.8247.00-00
-hostname: LAB-SPE247
-LSP-ID 2170.0518.8248.00-00
-hostname: LAB-SPE248
-LSP-ID 2170.0518.8251.00-00
-hostname: lab-spe251
-LSP-ID c0ca.0001.0000.00-00
-hostname: IXIA-RT-1021311210-Port-1/4-BGP-Funktions-Test
 ISIS Adj is : Down
 ISIS Adj is : Init
 ISIS Adj is : Up
